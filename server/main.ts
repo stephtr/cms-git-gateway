@@ -1,14 +1,8 @@
 import express, { Request, Response } from 'express';
 import session from 'express-session';
 import passport from 'passport';
-import OAuth2Strategy from 'passport-oauth2';
 import { Arguments, getArguments } from './arguments';
-import {
-	getAuthSettings,
-	Profile,
-	userProfileProvider,
-	VerifiedProfile,
-} from './authentication';
+import { Profile, getAuthStrategy } from './authentication';
 
 async function Main({
 	port,
@@ -18,29 +12,6 @@ async function Main({
 	authClientSecret,
 	authPkce,
 }: Arguments) {
-	const authSettings = await getAuthSettings(authServer);
-	const authStrategy = new OAuth2Strategy(
-		{
-			...authSettings,
-			clientID: authClientId,
-			clientSecret: authClientSecret,
-			callbackURL: `${hostingUrl}/oidc-callback`,
-			pkce: authPkce,
-			state: authPkce,
-			scope: 'openid profile email',
-		} as any,
-		(accessToken, refreshToken, params, profile: VerifiedProfile, done) => {
-			if (!profile.emailVerified) {
-				done(null, undefined, {
-					message: "OIDC: the user' email address is not verified.",
-				});
-			}
-			done(null, profile);
-		},
-	);
-	// eslint-disable-next-line @typescript-eslint/unbound-method
-	authStrategy.userProfile = userProfileProvider(authSettings.userInfoURL);
-
 	const app = express();
 	app.use(
 		session({
@@ -51,14 +22,23 @@ async function Main({
 	);
 	app.use(passport.initialize());
 	app.use(passport.session());
-	passport.use('oidc', authStrategy);
+	passport.use(
+		'oidc',
+		await getAuthStrategy({
+			server: authServer,
+			clientId: authClientId,
+			clientSecret: authClientSecret,
+			usePKCE: authPkce,
+			callbackUrl: `${hostingUrl}/oidc-callback`,
+		}),
+	);
 
 	passport.serializeUser<Profile, string>((user, done) => {
 		done(null, user.id);
 	});
 
 	passport.deserializeUser<Profile, string>((userId, done) => {
-		done(null, obj);
+		done(null, { id: userId, email: '', name: '' });
 	});
 
 	app.get('/', (req, res) => res.send('<a href="/profile">Profile</a>'));

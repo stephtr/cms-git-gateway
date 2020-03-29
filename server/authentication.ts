@@ -1,4 +1,4 @@
-import fetch from 'node-fetch';
+import { Issuer, Strategy, TokenSet, UserinfoResponse } from 'openid-client';
 
 export interface Profile {
 	id: string;
@@ -6,51 +6,55 @@ export interface Profile {
 	email: string;
 }
 
-export interface VerifiedProfile extends Profile {
-	emailVerified: boolean;
+interface AuthStrategyOptions {
+	server: string;
+	clientId: string;
+	clientSecret?: string;
+	callbackUrl: string;
+	usePKCE?: boolean;
 }
 
-export const userProfileProvider = (userInfoURL: string) => async (
-	accessToken: string,
-	done: (error?: Error | null, profile?: VerifiedProfile) => void,
-) => {
-	try {
-		const data = await fetch(userInfoURL, {
-			headers: {
-				Authorization: `Bearer ${accessToken}`,
-			},
-		});
-		const obj = await data.json();
-		if (!obj.sub) {
-			throw new Error('OIDC: Expected `sub` to be set.');
-		}
-		if (!obj.name) {
-			throw new Error('OIDC: Expected `name` to be set.');
-		}
-		if (!obj.email) {
-			throw new Error('OIDC: Expected `email` to be set.');
+export async function getAuthStrategy({
+	server,
+	clientId,
+	clientSecret,
+	usePKCE = false,
+	callbackUrl,
+}: AuthStrategyOptions) {
+	const authIssuer = await Issuer.discover(server);
+	const authClient = new authIssuer.Client({
+		client_id: clientId,
+		client_secret: clientSecret,
+		redirect_uris: [callbackUrl],
+		response_types: ['code'],
+		token_endpoint_auth_method: clientSecret
+			? 'client_secret_basic'
+			: 'none',
+	});
+
+	const strategyOptions = {
+		client: authClient,
+		usePKCE,
+		params: {
+			redirect_uri: callbackUrl,
+			scope: 'openid profile email',
+			response_type: 'code',
+		},
+	};
+	const verifier = (
+		tokenSet: TokenSet,
+		profile: UserinfoResponse,
+		done: (error?: Error | null, user?: any) => void,
+	) => {
+		if (!profile.email_verified) {
+			done(new Error("OIDC: the user's email address is not verified."));
 		}
 		done(null, {
-			id: obj.sub,
-			name: obj.name,
-			email: obj.email,
-			emailVerified: obj.email_verified,
-		});
-	} catch (error) {
-		done(error);
-	}
-};
+			id: profile.sub,
+			name: profile.name,
+			email: profile.email,
+		} as Profile);
+	};
 
-export async function getAuthSettings(authServer: string) {
-	const url = `${authServer}/.well-known/openid-configuration`;
-	try {
-		const data = await (await fetch(url)).json();
-		return {
-			authorizationURL: data.authorization_endpoint,
-			tokenURL: data.token_endpoint,
-			userInfoURL: data.userinfo_endpoint,
-		};
-	} catch (error) {
-		throw new Error(`Can't fetch OIDC config for ${url}`);
-	}
+	return new Strategy(strategyOptions, verifier);
 }
