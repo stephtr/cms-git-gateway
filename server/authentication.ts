@@ -15,6 +15,7 @@ interface AuthStrategyOptions {
 	clientSecret?: string;
 	callbackUrl: string;
 	usePKCE?: boolean;
+	logoutUrl?: string;
 }
 
 export async function getAuthStrategy({
@@ -23,12 +24,14 @@ export async function getAuthStrategy({
 	clientSecret,
 	usePKCE = false,
 	callbackUrl,
+	logoutUrl,
 }: AuthStrategyOptions) {
 	const authIssuer = await Issuer.discover(server);
 	const authClient = new authIssuer.Client({
 		client_id: clientId,
 		client_secret: clientSecret,
 		redirect_uris: [callbackUrl],
+		post_logout_redirect_uris: logoutUrl ? [logoutUrl] : undefined,
 		response_types: ['code'],
 		token_endpoint_auth_method: clientSecret
 			? 'client_secret_basic'
@@ -59,7 +62,10 @@ export async function getAuthStrategy({
 		} as Profile);
 	};
 
-	return new Strategy(strategyOptions, verifier);
+	return {
+		authStrategy: new Strategy(strategyOptions, verifier),
+		authClient,
+	};
 }
 
 interface AuthSetupOptions {
@@ -83,16 +89,16 @@ export async function setupExpressAuth(
 	);
 	app.use(passport.initialize());
 	app.use(passport.session());
-	passport.use(
-		'oidc',
-		await getAuthStrategy({
-			server,
-			clientId,
-			clientSecret,
-			usePKCE,
-			callbackUrl: `${hostingUrl}/oidc-callback`,
-		}),
-	);
+
+	const { authStrategy, authClient } = await getAuthStrategy({
+		server,
+		clientId,
+		clientSecret,
+		usePKCE,
+		callbackUrl: `${hostingUrl}/oidc-callback`,
+		logoutUrl: hostingUrl,
+	});
+	passport.use('oidc', authStrategy);
 
 	passport.serializeUser((user, done) => {
 		done(null, user);
@@ -106,7 +112,9 @@ export async function setupExpressAuth(
 	app.get('/logout', (req, res) => {
 		req.logout();
 		req.session!.destroy(() => {});
-		res.redirect('/');
+		res.redirect(
+			authClient.endSessionUrl({ post_logout_redirect_uri: hostingUrl }),
+		);
 	});
 
 	app.use(

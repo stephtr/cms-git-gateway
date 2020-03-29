@@ -1030,10 +1030,10 @@ eslint-config-prettier@^6.9.0:
   dependencies:
     get-stdin "^6.0.0"
 
-eslint-config-tonalio@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/eslint-config-tonalio/-/eslint-config-tonalio-1.0.0.tgz#f9fc61a11db136f151e0ff269886de8e6549bf36"
-  integrity sha512-cz2S53Vl8iGTwGnTxLFQMC8vEjwhLkkx3lS8k5ffOZNgZq1pf/H7n5RqBb+UQLGwGLTXHCo2gaN6MdPYeO2D/Q==
+eslint-config-tonalio@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/eslint-config-tonalio/-/eslint-config-tonalio-1.1.0.tgz#268f6541e25ce6d4b18ead6b0363bf2d8de0932f"
+  integrity sha512-vgfnpgWLVOqUXBPh+b6rC/Fqr5xNbZoAIY9jCUvX6x6uwRPBRk8kOiCLkoMYK2x412NkBFX0RzJLMw8gVOScPg==
   dependencies:
     "@typescript-eslint/eslint-plugin" "^2.23.0"
     "@typescript-eslint/parser" "^2.23.0"

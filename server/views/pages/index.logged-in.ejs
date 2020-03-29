@@ -1,6 +1,5 @@
-<%- include('../partials/header.ejs') %>
+<%- include('../partials/header.ejs', {loggedIn: true}) %>
 
 <p>Hello <%= userName %> from index!</p>
-<p><a href="/logout">Abmelden</a></p>
 
 <%- include('../partials/footer.ejs') %>

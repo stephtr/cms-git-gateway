@@ -11,7 +11,9 @@ function ensureLoggedIn(req: Request, res: Response, next: () => void) {
 export default function addAppRoutes(app: Express) {
 	app.set('view engine', 'ejs');
 
-	app.use('/error', (req, res) => res.status(500).send('An error occured.'));
+	app.use('/error', (req, res) =>
+		res.status(500).render('pages/error.ejs', { loggedIn: !!req.user }),
+	);
 
 	app.get('/', (req, res) => {
 		if (req.user) {
