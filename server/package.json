@@ -7,6 +7,7 @@
 	"license": "GPL-3.0",
 	"scripts": {
 		"start": "ts-node-dev main.ts --authServer https://demo.identityserver.io/ --authClientId interactive.public.short --authPkce",
+		"debug": "ts-node-dev --inspect -- main.ts --authServer https://demo.identityserver.io/ --authClientId interactive.public.short --authPkce",
 		"lint": "cd .. && yarn lint"
 	},
 	"devDependencies": {
@@ -18,10 +19,14 @@
 		"ts-node-dev": "^1.0.0-pre.44"
 	},
 	"dependencies": {
+		"ejs": "^3.0.1",
 		"express": "^4.17.1",
 		"express-session": "^1.17.0",
 		"openid-client": "^3.14.1",
 		"passport": "^0.4.1",
+		"reflect-metadata": "^0.1.13",
+		"sqlite3": "^4.1.1",
+		"typeorm": "^0.2.24",
 		"yargs": "^15.3.1"
 	}
 }
