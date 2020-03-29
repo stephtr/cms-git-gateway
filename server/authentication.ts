@@ -2,12 +2,9 @@ import { Express } from 'express';
 import { Issuer, Strategy, TokenSet, UserinfoResponse } from 'openid-client';
 import passport from 'passport';
 import session from 'express-session';
-
-export interface Profile {
-	id: string;
-	name: string;
-	email: string;
-}
+import { getRepository } from 'typeorm';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { User, User as AppUser } from './entities/user';
 
 interface AuthStrategyOptions {
 	server: string;
@@ -16,6 +13,7 @@ interface AuthStrategyOptions {
 	callbackUrl: string;
 	usePKCE?: boolean;
 	logoutUrl?: string;
+	adminSub?: string;
 }
 
 export async function getAuthStrategy({
@@ -25,6 +23,7 @@ export async function getAuthStrategy({
 	usePKCE = false,
 	callbackUrl,
 	logoutUrl,
+	adminSub,
 }: AuthStrategyOptions) {
 	const authIssuer = await Issuer.discover(server);
 	const authClient = new authIssuer.Client({
@@ -52,14 +51,41 @@ export async function getAuthStrategy({
 		profile: UserinfoResponse,
 		done: (error?: Error | null, user?: any) => void,
 	) => {
-		if (!profile.email_verified) {
-			done(new Error("OIDC: the user's email address is not verified."));
-		}
-		done(null, {
-			id: profile.sub,
-			name: profile.name,
-			email: profile.email,
-		} as Profile);
+		(async () => {
+			if (!profile.email_verified) {
+				return done(
+					new Error(
+						"OIDC: the user's email address is not verified.",
+					),
+				);
+			}
+
+			const existingUser = await getRepository(User).findOne(
+				profile.sub,
+				{
+					select: ['email'],
+				},
+			);
+
+			if (existingUser && existingUser.email !== profile.email) {
+				return done(
+					new Error(
+						"OIDC: the user's email address is already in use.",
+					),
+				);
+			}
+
+			const user = {
+				id: profile.sub,
+				name: profile.name,
+				email: profile.email,
+				isAdmin: adminSub ? profile.sub === adminSub : false,
+			};
+
+			getRepository(User).save(user);
+
+			return done(null, user);
+		})();
 	};
 
 	return {
@@ -74,11 +100,19 @@ interface AuthSetupOptions {
 	clientSecret?: string;
 	usePKCE?: boolean;
 	hostingUrl: string;
+	adminSub?: string;
 }
 
 export async function setupExpressAuth(
 	app: Express,
-	{ server, clientId, clientSecret, usePKCE, hostingUrl }: AuthSetupOptions,
+	{
+		server,
+		clientId,
+		clientSecret,
+		usePKCE,
+		hostingUrl,
+		adminSub,
+	}: AuthSetupOptions,
 ) {
 	app.use(
 		session({
@@ -97,15 +131,23 @@ export async function setupExpressAuth(
 		usePKCE,
 		callbackUrl: `${hostingUrl}/oidc-callback`,
 		logoutUrl: hostingUrl,
+		adminSub,
 	});
 	passport.use('oidc', authStrategy);
 
-	passport.serializeUser((user, done) => {
-		done(null, user);
+	passport.serializeUser<User, string>((user, done) => {
+		return done(null, user.id);
 	});
 
-	passport.deserializeUser((userId, done) => {
-		done(null, userId);
+	passport.deserializeUser<User, string>((userId, done) => {
+		(async () => {
+			try {
+				const user = await getRepository(User).findOneOrFail(userId);
+				return done(null, user);
+			} catch (error) {
+				return done(error);
+			}
+		})();
 	});
 
 	app.get('/login', passport.authenticate('oidc'));
@@ -129,10 +171,7 @@ export async function setupExpressAuth(
 declare global {
 	// eslint-disable-next-line @typescript-eslint/no-namespace
 	namespace Express {
-		interface User {
-			id: string;
-			name: string;
-			email: string;
-		}
+		// eslint-disable-next-line @typescript-eslint/no-empty-interface
+		interface User extends AppUser {}
 	}
 }

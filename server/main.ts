@@ -1,7 +1,10 @@
 import express from 'express';
+import bodyParser from 'body-parser';
+import { createConnection } from 'typeorm';
 import { Arguments, getArguments } from './arguments';
 import addAppRoutes from './routes';
 import { setupExpressAuth } from './authentication';
+import 'reflect-metadata';
 
 async function Main({
 	port,
@@ -10,23 +13,40 @@ async function Main({
 	authClientId,
 	authClientSecret,
 	authPkce,
+	adminSub,
 }: Arguments) {
-	const app = express();
+	try {
+		await createConnection({
+			type: 'sqlite',
+			database: 'db.sql',
+			entities: ['entities/**/*.ts'],
+			migrations: ['migrations/**/*.ts'],
+			synchronize: true,
+		});
 
-	await setupExpressAuth(app, {
-		server: authServer,
-		clientId: authClientId,
-		clientSecret: authClientSecret,
-		usePKCE: authPkce,
-		hostingUrl,
-	});
+		const app = express();
+		app.disable('x-powered-by');
+		app.use(bodyParser.urlencoded({ extended: true }));
 
-	addAppRoutes(app);
+		await setupExpressAuth(app, {
+			server: authServer,
+			clientId: authClientId,
+			clientSecret: authClientSecret,
+			usePKCE: authPkce,
+			hostingUrl,
+			adminSub,
+		});
 
-	app.listen(port, () =>
+		addAppRoutes(app);
+
+		app.listen(port, () =>
+			// eslint-disable-next-line no-console
+			console.log(`Server listening on http://localhost:${port}`),
+		);
+	} catch (error) {
 		// eslint-disable-next-line no-console
-		console.log(`Server listening on http://localhost:${port}`),
-	);
+		console.error(error);
+	}
 }
 
 Main(getArguments());

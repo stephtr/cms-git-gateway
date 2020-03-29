@@ -9,6 +9,7 @@ export interface Arguments {
 	authClientId: string;
 	authClientSecret: string;
 	authPkce: boolean;
+	adminSub?: string;
 }
 
 export function getArguments(): Arguments {
@@ -40,6 +41,10 @@ export function getArguments(): Arguments {
 		authPkce: {
 			type: 'boolean',
 			description: 'Whether PKCE should be used for authentication',
+		},
+		adminSub: {
+			type: 'string',
+			description: "A user's `sub` claim to promote as an administrator",
 		},
 	});
 

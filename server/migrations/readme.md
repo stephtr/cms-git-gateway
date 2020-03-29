@@ -1,0 +1,1 @@
+This folder is being used for automatic TypeORM migrations.
