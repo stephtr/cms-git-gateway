@@ -1,0 +1,8 @@
+{
+	"name": "netlify-gateway-client",
+	"version": "0.0.0",
+	"description": "This project provides a gateway to Git APIs, which can be configured per repository and combined with OAuth.",
+	"repository": "https://github.com/stephtr/netlify-gateway-server.git",
+	"author": "Stephan Troyer <stephantroyer@live.at>",
+	"license": "GPL-3.0"
+}

@@ -1,0 +1,26 @@
+{
+	"name": "netlify-gateway-root",
+	"version": "0.0.0",
+	"private": true,
+	"description": "This project provides a gateway to Git APIs, which can be configured per repository and combined with OAuth.",
+	"repository": "https://github.com/stephtr/netlify-gateway-server.git",
+	"author": "Stephan Troyer <stephantroyer@live.at>",
+	"license": "GPL-3.0",
+	"workspaces": [
+		"server",
+		"client"
+	],
+	"scripts": {
+		"lint": "eslint . --max-warnings 0 --ext .js,.jsx,.ts,.tsx,.json"
+	},
+	"pre-commit": [
+		"lint"
+	],
+	"devDependencies": {
+		"eslint": "^6.8.0",
+		"eslint-config-tonalio": "^1.0.0",
+		"pre-commit": "^1.2.2",
+		"prettier": "^2.0.2",
+		"typescript": "^3.8.3"
+	}
+}
