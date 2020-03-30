@@ -1,14 +1,5 @@
-<%- include('../partials/header.ejs', {loggedIn: true, page: 'users'}) %>
+<%- include('../partials/header.ejs', { page: 'users' }) %>
 
-<style>
-	.users-table .fas { font-size: larger; }
-	.action { border: none; background: none; opacity: 0.1; transition: opacity 0.2s; padding: 5px 5px; margin: 0 5px; }
-	.action:hover { opacity: 0.75 !important; }
-	.action:focus { outline: 1px solid #999; opacity: 1 !important; }
-	.users-table tbody tr { height: 44px; }
-	.users-table td { vertical-align: middle; }
-	.users-table tr:hover .action { opacity: 0.25; }
-</style>
 <script>
 	function verifyAction() {
 		var user = event.target.elements['userName'].value || '';
@@ -27,7 +18,7 @@
 
 <h1 class="h2 mt-3">User management</h1>
 
-<table class="table table-striped table-sm users-table">
+<table class="table table-striped table-sm data-table">
 	<thead>
 		<tr>
 			<th style="width: 1em;"></th>
@@ -52,11 +43,11 @@
 							<input type="hidden" name="userId" value="<%=usr.id%>" />
 							<input type="hidden" name="userName" value="<%=usr.name%>" />
 							<% if (usr.isAdmin) { %>
-								<button type="submit" name="action_revoke" class="action fas fa-shield-virus" title="Revoke admin rights"></button>
+								<button type="submit" name="action_revoke" class="action-button fas fa-shield-virus" title="Revoke admin rights"></button>
 							<% } else { %>
-								<button type="submit" name="action_promote" class="action fas fa-shield-alt" title="Promote user as admin"></button>
+								<button type="submit" name="action_promote" class="action-button fas fa-shield-alt" title="Promote user as admin"></button>
 							<% } %>
-							<button type="submit" name="action_remove" class="action fas fa-trash" title="Remove user"></button>
+							<button type="submit" name="action_remove" class="action-button fas fa-trash" title="Remove user"></button>
 						</form>
 					<% } %>
 				</td>

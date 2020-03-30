@@ -3,7 +3,7 @@
 		<ul class="nav flex-column">
 			<% if (user.isAdmin) { %>
 				<li class="nav-item">
-					<a class="nav-link <%= (page === 'users' ? 'active' : '') %>" href="/admin/sites">
+					<a class="nav-link <%= (page === 'sites' ? 'active' : '') %>" href="/admin/sites">
 						<span class="icon fas fa-globe"></span>
 						Sites <% if (page === 'sites') { %><span class="sr-only">(current)</span><% } %>
 					</a>

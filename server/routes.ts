@@ -69,7 +69,7 @@ export default function addAppRoutes(app: Express) {
 		}),
 	);
 
-	app.get('/admin/access', ensureLoggedIn, (req, res) =>
+	app.get('/admin/access', ensureIsAdmin, (req, res) =>
 		res.render('pages/access.ejs', {
 			user: req.user,
 		}),
