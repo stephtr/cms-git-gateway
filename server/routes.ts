@@ -1,6 +1,7 @@
 import { Express, Request, Response } from 'express';
 import { getRepository } from 'typeorm';
 import { User } from './entities/user';
+import { Site } from './entities/site';
 
 function ensureLoggedIn(req: Request, res: Response, next: () => void) {
 	if (req.isAuthenticated()) {
@@ -32,9 +33,13 @@ export default function addAppRoutes(app: Express) {
 		});
 	});
 
-	app.get('/admin/access', ensureIsAdmin, (req, res) =>
-		res.render('pages/access.ejs', {
+	app.get('/admin/access', ensureIsAdmin, async (req, res) =>
+		res.render('pages/sites.ejs', {
 			user: req.user,
+			sites: await getRepository(Site).find({
+				select: ['domain', 'proxyType', 'url'],
+				order: { domain: 'ASC' },
+			}),
 		}),
 	);
 
@@ -62,10 +67,15 @@ export default function addAppRoutes(app: Express) {
 	app.get('/admin/users', ensureIsAdmin, async (req, res) =>
 		res.render('pages/users.ejs', {
 			user: req.user,
-			users: await getRepository(User).find({
-				select: ['id', 'name', 'email', 'isAdmin'],
-				order: { id: 'DESC' },
-			}),
+			users: (
+				await getRepository(User).find({
+					select: ['id', 'name', 'email', 'isAdmin'],
+					order: { id: 'DESC' },
+				})
+			).sort(
+				// sort the list such that the current user will be on top
+				(a, b) => +(b.id === req.user!.id) - +(a.id === req.user!.id),
+			),
 		}),
 	);
 }
