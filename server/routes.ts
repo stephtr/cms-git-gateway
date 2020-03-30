@@ -64,18 +64,19 @@ export default function addAppRoutes(app: Express) {
 		res.redirect('/admin/users');
 	});
 
-	app.get('/admin/users', ensureIsAdmin, async (req, res) =>
+	app.get('/admin/users', ensureIsAdmin, async (req, res) => {
+		const users = await getRepository(User).find({
+			select: ['id', 'name', 'email', 'isAdmin'],
+			order: { id: 'DESC' },
+		});
+		users.sort(
+			// sort the list such that the current user will be on top
+			(a, b) => +(b.id === req.user!.id) - +(a.id === req.user!.id),
+		);
+
 		res.render('pages/users.ejs', {
 			user: req.user,
-			users: (
-				await getRepository(User).find({
-					select: ['id', 'name', 'email', 'isAdmin'],
-					order: { id: 'DESC' },
-				})
-			).sort(
-				// sort the list such that the current user will be on top
-				(a, b) => +(b.id === req.user!.id) - +(a.id === req.user!.id),
-			),
-		}),
-	);
+			users,
+		});
+	});
 }

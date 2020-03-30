@@ -6,8 +6,8 @@
 	"author": "Stephan Troyer <stephantroyer@live.at>",
 	"license": "GPL-3.0",
 	"scripts": {
-		"start": "ts-node-dev main.ts --authServer https://demo.identityserver.io/ --authClientId interactive.public.short --authPkce --adminSub 11",
-		"debug": "ts-node-dev --inspect -- main.ts --authServer https://demo.identityserver.io/ --authClientId interactive.public.short --authPkce --adminSub 11",
+		"start": "ts-node-dev main.ts --authServer https://demo.identityserver.io/ --authClientId interactive.public --authPkce --adminSub 11",
+		"debug": "ts-node-dev --inspect -- main.ts --authServer https://demo.identityserver.io/ --authClientId interactive.public --authPkce --adminSub 11",
 		"lint": "cd .. && yarn lint"
 	},
 	"devDependencies": {
