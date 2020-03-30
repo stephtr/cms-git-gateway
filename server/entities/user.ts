@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryColumn } from 'typeorm';
+import { Entity, Column, PrimaryColumn, ManyToMany } from 'typeorm';
+import { Site } from './site';
 
 @Entity()
 export class User {
@@ -13,4 +14,7 @@ export class User {
 
 	@Column()
 	isAdmin: boolean = false;
+
+	@ManyToMany(() => Site, (site) => site.editors)
+	sites?: Site[];
 }

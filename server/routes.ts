@@ -32,8 +32,8 @@ export default function addAppRoutes(app: Express) {
 		});
 	});
 
-	app.get('/admin/sites', ensureIsAdmin, (req, res) =>
-		res.render('pages/sites.ejs', {
+	app.get('/admin/access', ensureIsAdmin, (req, res) =>
+		res.render('pages/access.ejs', {
 			user: req.user,
 		}),
 	);
@@ -66,12 +66,6 @@ export default function addAppRoutes(app: Express) {
 				select: ['id', 'name', 'email', 'isAdmin'],
 				order: { id: 'DESC' },
 			}),
-		}),
-	);
-
-	app.get('/admin/access', ensureIsAdmin, (req, res) =>
-		res.render('pages/access.ejs', {
-			user: req.user,
 		}),
 	);
 }

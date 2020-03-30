@@ -1,24 +1,16 @@
 <nav class="col-md-2 d-none d-md-block bg-light sidebar">
 	<div class="sidebar-sticky">
 		<ul class="nav flex-column">
-			<% if (user.isAdmin) { %>
-				<li class="nav-item">
-					<a class="nav-link <%= (page === 'sites' ? 'active' : '') %>" href="/admin/sites">
-						<span class="icon fas fa-globe"></span>
-						Sites <% if (page === 'sites') { %><span class="sr-only">(current)</span><% } %>
-					</a>
-				</li>
-				<li class="nav-item">
-					<a class="nav-link <%= (page === 'users' ? 'active' : '') %>" href="/admin/users">
-						<span class="icon fas fa-users"></span>
-						Users <% if (page === 'users') { %><span class="sr-only">(current)</span><% } %>
-					</a>
-				</li>
-			<% } %>
 			<li class="nav-item">
 				<a class="nav-link <%= page === 'access' ? 'active' : '' %>" href="/admin/access">
 					<span class="icon fas fa-key"></span>
 					Access <% if (page === 'access') { %><span class="sr-only">(current)</span><% } %>
+				</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link <%= (page === 'users' ? 'active' : '') %>" href="/admin/users">
+					<span class="icon fas fa-users"></span>
+					Users <% if (page === 'users') { %><span class="sr-only">(current)</span><% } %>
 				</a>
 			</li>
 		</ul>

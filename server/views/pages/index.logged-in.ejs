@@ -2,7 +2,20 @@
 
 <h1 class="h2 mt-3">Welcome back!</h1>
 <p class="lead">
-	Choose your action.<br />Your available sites will appear here soon.
+	<% if (user.sites && user.sites.length) { %>
+		Your available websites for editing are:
+	<% } else { %>
+		There aren't any websites available for editing yet.
+	<% } %>
+</p>
+<p>
+	<ul>
+		<% for (var site of user.sites || []) { %>
+			<li>
+				<a href="https://<%=site.domain %>/admin/"><%=site.domain %></a>
+			</li>
+		<% } %>
+	</ul>
 </p>
 
 <%- include('../partials/footer.ejs') %>
