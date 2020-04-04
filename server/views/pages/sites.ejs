@@ -3,10 +3,12 @@
 <script>
 	function verifyAction() {
 		var domain = event.target.elements['domain'].value || '';
+		var user = event.target.elements['username'].value || '';
 		var question = 'Do you want to do this action?';
 
 		switch (event.submitter && event.submitter.name) {
 			case 'action_remove': question = 'Do you really want to remove ' + domain + '?'; break;
+			case 'action_revoke': question = 'Do you really want to revoke the access for ' + user + '?'; break;
 			case 'action_edit': return;
 			case 'action_clone': return;
 		}
@@ -15,13 +17,26 @@
 		}
 	}
 </script>
+<style>
+	.table-striped-4 tbody tr:nth-child(4n+1), .table-striped-4 tbody tr:nth-child(4n+2) { background-color: rgba(0,0,0,0.05); }
+	.table-striped-4 tbody tr:nth-child(4n+2) td, .table-striped-4 tbody tr:nth-child(4n+4) td { border-top: none; }
+	.add-user-checkbox:not(:checked) ~ .add-user-block, .add-user-checkbox:checked + label { display: none; }
+	.cur-default { cursor: default; }
+	.cur-pointer { cursor: pointer; }
+</style>
 
 <div class="mt-3 mb-2 d-flex flex-column flex-md-row align-items-center">
 	<h1 class="h2 mr-md-auto m-0">Website management</h1>
 	<a href="/admin/edit-website" class="btn btn-outline-primary"><span class="fas fa-plus"></span> Add website</a>
 </div>
 
-<table class="table table-striped table-sm data-table">
+<datalist id="users">
+	<% for (let usr of users) { %>
+		<option value="<%=usr.email %>">
+	<% } %>
+</datalist>
+
+<table class="table table-striped-4 table-sm data-table">
 	<thead>
 		<tr>
 			<th>Domain</th>
@@ -44,6 +59,38 @@
 						<button type="submit" name="action_edit" class="action-button fas fa-pen" title="Edit site"></button>
 						<button type="submit" name="action_clone" class="action-button fas fa-copy" title="Duplicate site"></button>
 						<button type="submit" name="action_remove" class="action-button fas fa-trash" title="Remove site"></button>
+					</form>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="4" class="px-3 pt-0">
+					<div><strong>Users</strong></div>
+					<% for (let usr of site.editors || []) { %>
+						<div class="badge badge-pill badge-info cur-default" title="<%=usr.email%>">
+							<form method="post" onsubmit="verifyAction()">
+								<input type="hidden" name="_csrf" value="<%=csrfToken %>">
+								<input type="hidden" name="id" value="<%=site.id%>" />
+								<input type="hidden" name="user" value="<%=usr.id%>" />
+								<input type="hidden" name="username" value="<%=usr.name%>" />
+								<input type="hidden" name="domain" value="<%=site.domain%>" />
+								<button type="submit" name="action_revoke" class="action-button-small text-danger fas fa-times py-1" title="Revoke access"></button>
+								<%=usr.name %>
+							</form>
+						</div>
+					<% } %>
+					<input type="radio" class="d-none add-user-checkbox" id="show-add-<%=site.id%>">
+					<label class="badge badge-pill cur-pointer btn btn-info" for="show-add-<%=site.id%>">
+						<span class="fas fa-plus text-white py-1"></span> Add User
+					</label>
+					<form method="post" class="add-user-block">
+						<div class="input-group input-group-sm mt-2" style="max-width: 300px;">
+							<input type="hidden" name="_csrf" value="<%=csrfToken %>">
+							<input type="hidden" name="id" value="<%=site.id%>" />
+							<input type="email" name="user" class="form-control" placeholder="Email address to add" list="users">
+							<div class="input-group-append">
+								<button type="submit" name="action_add_user" class="btn btn-outline-primary">Add</button>
+							</div>
+						</div>
 					</form>
 				</td>
 			</tr>

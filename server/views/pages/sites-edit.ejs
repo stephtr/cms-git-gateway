@@ -20,6 +20,7 @@
 					required
 					value="<%=data.domain || '' %>"
 					placeholder="example.com"
+					autocomplete="off"
 				>
 			</div>
 			<div class="form-group">
@@ -42,6 +43,7 @@
 					required
 					value="<%=data.repository || '' %>"
 					placeholder="https://github.com/example/repo"
+					autocomplete="off"
 				>
 			</div>
 			<div class="form-group">
@@ -53,6 +55,7 @@
 					<%=mode === 'add' ? 'required' : '' %>
 					placeholder="<%=mode === 'add' ? '' : 'keep unchanged' %>"
 					value="<%=data.accessToken || '' %>"
+					autocomplete="off"
 				>
 			</div>
 			<hr class="mb-4">

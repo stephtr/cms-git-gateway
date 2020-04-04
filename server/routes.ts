@@ -1,5 +1,5 @@
 import { Express, Request, Response } from 'express';
-import { getRepository } from 'typeorm';
+import { getRepository, Repository, createQueryBuilder } from 'typeorm';
 import csrf from 'csurf';
 import { User } from './entities/user';
 import { Site, ProxyTypes } from './entities/site';
@@ -20,6 +20,17 @@ const ensureIsAdmin = (req: Request, res: Response, next: () => void) =>
 
 		return res.redirect('/error');
 	});
+
+const getUsers = async (repository: Repository<User>, currentUser: User) =>
+	(
+		await repository.find({
+			select: ['id', 'name', 'email', 'isAdmin'],
+			order: { id: 'DESC' },
+		})
+	).sort(
+		// sort the list such that the current user will be on top
+		(a, b) => +(b.id === currentUser.id) - +(a.id === currentUser.id),
+	);
 
 export default function addAppRoutes(app: Express) {
 	const csrfProtection = csrf();
@@ -68,6 +79,32 @@ export default function addAppRoutes(app: Express) {
 						mode: 'clone',
 					});
 				}
+				if (req.body.action_add_user !== undefined) {
+					const user = await getRepository(User).findOne({
+						where: { email: req.body.user },
+					});
+					if (user) {
+						try {
+							await createQueryBuilder()
+								.relation(Site, 'editors')
+								.of(site)
+								.add(user);
+						} catch {
+							// user probably already exists in `editors`
+						}
+					}
+				}
+				if (req.body.action_revoke !== undefined) {
+					const user = await getRepository(User).findOne(
+						req.body.user,
+					);
+					if (user) {
+						await createQueryBuilder()
+							.relation(Site, 'editors')
+							.of(site)
+							.remove(user);
+					}
+				}
 			}
 			return res.redirect('/admin/access');
 		},
@@ -79,7 +116,9 @@ export default function addAppRoutes(app: Express) {
 			sites: await getRepository(Site).find({
 				select: ['id', 'domain', 'proxyType', 'repository'],
 				order: { domain: 'ASC' },
+				relations: ['editors'],
 			}),
+			users: await getUsers(getRepository(User), req.user!),
 			csrfToken: req.csrfToken(),
 		}),
 	);
@@ -211,18 +250,9 @@ export default function addAppRoutes(app: Express) {
 	);
 
 	app.get('/admin/users', ensureIsAdmin, csrfProtection, async (req, res) => {
-		const users = await getRepository(User).find({
-			select: ['id', 'name', 'email', 'isAdmin'],
-			order: { id: 'DESC' },
-		});
-		users.sort(
-			// sort the list such that the current user will be on top
-			(a, b) => +(b.id === req.user!.id) - +(a.id === req.user!.id),
-		);
-
 		return res.render('pages/users.ejs', {
 			user: req.user,
-			users,
+			users: await getUsers(getRepository(User), req.user!),
 			csrfToken: req.csrfToken(),
 		});
 	});
