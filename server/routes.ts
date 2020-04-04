@@ -40,7 +40,12 @@ export default function addAppRoutes(app: Express) {
 		res.status(500).render('pages/error.ejs', { user: req.user }),
 	);
 
-	app.get('/', (req, res) => {
+	app.get('/', async (req, res) => {
+		if (req.user) {
+			req.user = await getRepository(User).findOne(req.user.id, {
+				relations: ['sites'],
+			});
+		}
 		res.render(`pages/index${req.user ? '.logged-in' : ''}.ejs`, {
 			user: req.user,
 		});
