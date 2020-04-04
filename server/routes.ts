@@ -1,14 +1,15 @@
 import { Express, Request, Response } from 'express';
 import { getRepository } from 'typeorm';
+import csrf from 'csurf';
 import { User } from './entities/user';
-import { Site } from './entities/site';
+import { Site, ProxyTypes } from './entities/site';
 
 function ensureLoggedIn(req: Request, res: Response, next: () => void) {
 	if (req.isAuthenticated()) {
 		return next();
 	}
 
-	res.redirect('/login');
+	return res.redirect('/login');
 }
 
 const ensureIsAdmin = (req: Request, res: Response, next: () => void) =>
@@ -17,10 +18,11 @@ const ensureIsAdmin = (req: Request, res: Response, next: () => void) =>
 			return next();
 		}
 
-		res.redirect('/error');
+		return res.redirect('/error');
 	});
 
 export default function addAppRoutes(app: Express) {
+	const csrfProtection = csrf();
 	app.set('view engine', 'ejs');
 
 	app.use('/error', (req, res) =>
@@ -33,38 +35,182 @@ export default function addAppRoutes(app: Express) {
 		});
 	});
 
-	app.get('/admin/access', ensureIsAdmin, async (req, res) =>
+	app.post(
+		'/admin/access',
+		ensureIsAdmin,
+		csrfProtection,
+		async (req, res) => {
+			const siteRepo = getRepository(Site);
+			const site = await siteRepo.findOne(req.body.id);
+			if (site) {
+				if (req.body.action_remove !== undefined) {
+					await siteRepo.delete(site);
+				}
+				if (req.body.action_edit !== undefined) {
+					return res.render('pages/sites-edit.ejs', {
+						user: req.user,
+						csrfToken: req.csrfToken(),
+						proxyTypes: Object.values(ProxyTypes),
+						errors: [],
+						id: site.id,
+						data: { ...site, accessToken: '' },
+						mode: 'edit',
+					});
+				}
+				if (req.body.action_clone !== undefined) {
+					return res.render('pages/sites-edit.ejs', {
+						user: req.user,
+						csrfToken: req.csrfToken(),
+						proxyTypes: Object.values(ProxyTypes),
+						errors: [],
+						id: site.id,
+						data: {},
+						mode: 'clone',
+					});
+				}
+			}
+			return res.redirect('/admin/access');
+		},
+	);
+
+	app.get('/admin/access', ensureIsAdmin, csrfProtection, async (req, res) =>
 		res.render('pages/sites.ejs', {
 			user: req.user,
 			sites: await getRepository(Site).find({
-				select: ['domain', 'proxyType', 'url'],
+				select: ['id', 'domain', 'proxyType', 'repository'],
 				order: { domain: 'ASC' },
 			}),
+			csrfToken: req.csrfToken(),
 		}),
 	);
 
-	app.post('/admin/users', ensureIsAdmin, async (req, res) => {
-		const userRepo = getRepository(User);
-		if (req.body.userId !== req.user!.id) {
-			const user = await userRepo.findOne(req.body.userId);
-			if (user) {
-				if (req.body.action_promote !== undefined) {
-					user.isAdmin = true;
-					userRepo.save(user);
+	app.post(
+		'/admin/edit-website',
+		ensureIsAdmin,
+		csrfProtection,
+		async (req, res) => {
+			const errors: string[] = [];
+			const data: Omit<Site, 'id'> = {
+				domain: req.body.domain,
+				proxyType: req.body.proxyType,
+				repository: req.body.repository,
+				accessToken: req.body.accessToken,
+			};
+			const parsedData: Omit<Site, 'id'> = { ...data };
+			const siteRepo = getRepository(Site);
+
+			const domainResult = /^(https?:\/\/)?([^/]+)\/?$/.exec(data.domain);
+			if (domainResult) {
+				parsedData.domain = (
+					domainResult?.[2] || ''
+				).toLocaleLowerCase();
+				const foundSite = await siteRepo.findOne({
+					where: { domain: parsedData.domain },
+					select: ['id'],
+				});
+
+				if (foundSite && foundSite.id !== +req.body.id) {
+					errors.push('domain');
 				}
-				if (req.body.action_revoke !== undefined) {
-					user.isAdmin = false;
-					userRepo.save(user);
-				}
-				if (req.body.action_remove !== undefined) {
-					userRepo.delete(user);
+			} else {
+				errors.push('domain');
+			}
+
+			if (
+				!Object.values(ProxyTypes).includes(
+					data.proxyType as ProxyTypes,
+				)
+			) {
+				errors.push('proxyType');
+			}
+
+			const defaultRepoHosts: { [host: string]: string } = {
+				[ProxyTypes.GitHub]: 'https://github.com/',
+				[ProxyTypes.GitLab]: 'https://gitlab.com/',
+				[ProxyTypes.Bitbucket]: 'https://bitbucket.org/',
+			};
+			const linkData = /^(https?:\/\/[^/]+\/)?([^:/]+\/[^:/]+)(\.git|\/)?$/.exec(
+				data.repository,
+			);
+			if (linkData) {
+				parsedData.repository =
+					(linkData[1] || defaultRepoHosts[parsedData.proxyType]) +
+					linkData[2];
+			} else {
+				errors.push('repository');
+			}
+
+			if (!data.accessToken && req.body.id) {
+				parsedData.accessToken =
+					(
+						await siteRepo.findOne(req.body.id, {
+							select: ['accessToken'],
+						})
+					)?.accessToken || '';
+			}
+			if (!parsedData.accessToken) {
+				errors.push('accessToken');
+			}
+
+			if (errors.length) {
+				return res.render('pages/sites-edit.ejs', {
+					user: req.user,
+					csrfToken: req.csrfToken(),
+					proxyTypes: Object.values(ProxyTypes),
+					errors,
+					id: req.body.id,
+					data: { ...data },
+					mode: req.body.mode,
+				});
+			}
+			if (req.body.mode === 'edit') {
+				await siteRepo.update(req.body.id, parsedData);
+			} else {
+				await siteRepo.insert(parsedData);
+			}
+			return res.redirect('/admin/access');
+		},
+	);
+
+	app.get('/admin/edit-website', ensureIsAdmin, csrfProtection, (req, res) =>
+		res.render('pages/sites-edit.ejs', {
+			user: req.user,
+			csrfToken: req.csrfToken(),
+			proxyTypes: Object.values(ProxyTypes),
+			errors: [],
+			id: 0,
+			data: {},
+			mode: 'add',
+		}),
+	);
+
+	app.post(
+		'/admin/users',
+		ensureIsAdmin,
+		csrfProtection,
+		async (req, res) => {
+			const userRepo = getRepository(User);
+			if (req.body.userId !== req.user!.id) {
+				const user = await userRepo.findOne(req.body.userId);
+				if (user) {
+					if (req.body.action_promote !== undefined) {
+						user.isAdmin = true;
+						await userRepo.update(user.id, user);
+					}
+					if (req.body.action_revoke !== undefined) {
+						user.isAdmin = false;
+						await userRepo.update(user.id, user);
+					}
+					if (req.body.action_remove !== undefined) {
+						await userRepo.delete(user);
+					}
 				}
 			}
-		}
-		res.redirect('/admin/users');
-	});
+			return res.redirect('/admin/users');
+		},
+	);
 
-	app.get('/admin/users', ensureIsAdmin, async (req, res) => {
+	app.get('/admin/users', ensureIsAdmin, csrfProtection, async (req, res) => {
 		const users = await getRepository(User).find({
 			select: ['id', 'name', 'email', 'isAdmin'],
 			order: { id: 'DESC' },
@@ -74,9 +220,10 @@ export default function addAppRoutes(app: Express) {
 			(a, b) => +(b.id === req.user!.id) - +(a.id === req.user!.id),
 		);
 
-		res.render('pages/users.ejs', {
+		return res.render('pages/users.ejs', {
 			user: req.user,
 			users,
+			csrfToken: req.csrfToken(),
 		});
 	});
 }

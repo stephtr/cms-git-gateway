@@ -1,5 +1,11 @@
 import { Express } from 'express';
-import { Issuer, Strategy, TokenSet, UserinfoResponse } from 'openid-client';
+import {
+	Issuer,
+	Strategy,
+	TokenSet,
+	UserinfoResponse,
+	custom,
+} from 'openid-client';
 import passport from 'passport';
 import session from 'express-session';
 import { getRepository } from 'typeorm';
@@ -25,6 +31,7 @@ export async function getAuthStrategy({
 	logoutUrl,
 	adminSub,
 }: AuthStrategyOptions) {
+	Issuer[custom.http_options] = (options) => ({ ...options, timeout: 10000 });
 	const authIssuer = await Issuer.discover(server);
 	const authClient = new authIssuer.Client({
 		client_id: clientId,
@@ -36,6 +43,7 @@ export async function getAuthStrategy({
 			? 'client_secret_basic'
 			: 'none',
 	});
+	authClient[custom.clock_tolerance] = 1;
 
 	const strategyOptions = {
 		client: authClient,
@@ -161,10 +169,10 @@ export async function setupExpressAuth(
 
 	app.use(
 		'/oidc-callback',
-		passport.authenticate('oidc', { failureRedirect: '/error' }),
-		(req, res) => {
-			res.redirect('/');
-		},
+		passport.authenticate('oidc', {
+			successRedirect: '/',
+			failureRedirect: '/error',
+		}),
 	);
 }
 

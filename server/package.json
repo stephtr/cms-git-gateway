@@ -19,7 +19,9 @@
 		"ts-node-dev": "^1.0.0-pre.44"
 	},
 	"dependencies": {
+		"@types/csurf": "^1.9.36",
 		"body-parser": "^1.19.0",
+		"csurf": "^1.11.0",
 		"ejs": "^3.0.1",
 		"express": "^4.17.1",
 		"express-session": "^1.17.0",

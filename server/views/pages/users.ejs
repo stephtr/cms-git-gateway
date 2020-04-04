@@ -32,7 +32,7 @@
 			<tr>
 				<td>
 					<% if (usr.isAdmin) { %>
-						<span class="fas fa-user-shield" title="Admin"></span>
+						<span class="fas fa-user-shield" style="color: #333;" title="Admin"></span>
 					<% } %>
 				</td>
 				<td><%=usr.name %></td>
@@ -40,8 +40,9 @@
 				<td>
 					<% if (usr.id !== user.id) { %>
 						<form method="post" onsubmit="verifyAction()">
-							<input type="hidden" name="userId" value="<%=usr.id%>" />
-							<input type="hidden" name="userName" value="<%=usr.name%>" />
+							<input type="hidden" name="userId" value="<%=usr.id %>" />
+							<input type="hidden" name="userName" value="<%=usr.name %>" />
+							<input type="hidden" name="_csrf" value="<%=csrfToken %>">
 							<% if (usr.isAdmin) { %>
 								<button type="submit" name="action_revoke" class="action-button fas fa-shield-virus" title="Revoke admin rights"></button>
 							<% } else { %>

@@ -1,16 +1,27 @@
-import { Entity, Column, PrimaryColumn, ManyToMany, JoinTable } from 'typeorm';
+import {
+	Entity,
+	Column,
+	ManyToMany,
+	JoinTable,
+	PrimaryGeneratedColumn,
+	Index,
+} from 'typeorm';
 import { User } from './user';
 
 @Entity()
 export class Site {
-	@PrimaryColumn()
+	@PrimaryGeneratedColumn()
+	id: number = 0;
+
+	@Column()
+	@Index({ unique: true })
 	domain: string = '';
 
 	@Column()
 	proxyType: string = '';
 
 	@Column()
-	url: string = '';
+	repository: string = '';
 
 	@Column()
 	accessToken: string = '';
@@ -18,4 +29,10 @@ export class Site {
 	@ManyToMany(() => User, (user) => user.sites)
 	@JoinTable()
 	editors?: User[];
+}
+
+export enum ProxyTypes {
+	GitHub = 'GitHub',
+	GitLab = 'GitLab',
+	Bitbucket = 'Bitbucket',
 }

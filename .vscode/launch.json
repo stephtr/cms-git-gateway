@@ -8,7 +8,7 @@
 			"skipFiles": ["<node_internals>/**"],
 			"runtimeExecutable": "yarn",
 			"cwd": "${workspaceFolder}/server",
-			"runtimeArgs": ["start"],
+			"runtimeArgs": ["debug"],
 			"port": 9229,
 			"autoAttachChildProcesses": true
 		},

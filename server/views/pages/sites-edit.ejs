@@ -1,0 +1,64 @@
+<%- include('../partials/header.ejs', { page: 'access' }) %>
+
+<h1 class="h2 mt-3">Website management</h1>
+<p class="lead">
+	<%=mode === 'edit' ? 'Edit' : 'Add' %> a new website
+</p>
+
+<div class="row">
+	<div class="col-lg-8 col-xl-6">
+		<form method="post" action="/admin/edit-website">
+			<input type="hidden" name="_csrf" value="<%=csrfToken %>">
+			<input type="hidden" name="mode" value="<%=mode %>">
+			<input type="hidden" name="id" value="<%=id %>">
+			<div class="form-group">
+				<label for="domain">Domain of the website</label>
+				<input
+					type="text"
+					name="domain"
+					class="form-control <%=errors.includes('domain') ? 'is-invalid' : '' %>"
+					required
+					value="<%=data.domain || '' %>"
+					placeholder="example.com"
+				>
+			</div>
+			<div class="form-group">
+				<label for="proxyType">Repository type</label>
+				<select
+					name="proxyType"
+					class="form-control <%=errors.includes('proxyType') ? 'is-invalid' : '' %>"
+				>
+					<% for (var type of proxyTypes) { %>
+						<option <%= data.proxyType === type ? 'selected' : '' %>><%=type %></option>
+					<% } %>
+				</select>
+			</div>
+			<div class="form-group">
+				<label for="repository">Repository URL</label>
+				<input
+					type="text"
+					name="repository"
+					class="form-control <%=errors.includes('repository') ? 'is-invalid' : '' %>"
+					required
+					value="<%=data.repository || '' %>"
+					placeholder="https://github.com/example/repo"
+				>
+			</div>
+			<div class="form-group">
+				<label for="accessToken">Access Token for the repository</label>
+				<input
+					type="text"
+					name="accessToken"
+					class="form-control <%=errors.includes('accessToken') ? 'is-invalid' : '' %>"
+					<%=mode === 'add' ? 'required' : '' %>
+					placeholder="<%=mode === 'add' ? '' : 'keep unchanged' %>"
+					value="<%=data.accessToken || '' %>"
+				>
+			</div>
+			<hr class="mb-4">
+			<button class="btn btn-primary btn-lg btn-block" type="submit"><%=mode === 'edit' ? 'Update' : 'Add' %> website</button>
+		</form>
+	</div>
+</div>
+
+<%- include('../partials/footer.ejs') %>
