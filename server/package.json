@@ -7,7 +7,7 @@
 	"license": "GPL-3.0",
 	"scripts": {
 		"start": "ts-node-dev main.ts --authServer https://demo.identityserver.io/ --authClientId interactive.public --authPkce --adminSub 11",
-		"debug": "ts-node-dev --inspect -- main.ts --authServer https://demo.identityserver.io/ --authClientId interactive.public --authPkce --adminSub 11",
+		"build": "tsc main.ts",
 		"lint": "cd .. && yarn lint"
 	},
 	"devDependencies": {
