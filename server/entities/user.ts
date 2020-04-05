@@ -13,6 +13,9 @@ export class User {
 	email: string = '';
 
 	@Column()
+	profileImage?: string;
+
+	@Column()
 	isAdmin: boolean = false;
 
 	@ManyToMany(() => Site, (site) => site.editors)

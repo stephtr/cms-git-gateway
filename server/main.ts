@@ -18,7 +18,7 @@ async function Main({
 	try {
 		await createConnection({
 			type: 'sqlite',
-			database: 'db.sql',
+			database: 'db.sqlite',
 			entities: ['entities/**/*.ts'],
 			migrations: ['migrations/**/*.ts'],
 			synchronize: true,

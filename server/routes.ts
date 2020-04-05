@@ -1,15 +1,42 @@
 import { Express, Request, Response } from 'express';
 import { getRepository, Repository, createQueryBuilder } from 'typeorm';
 import csrf from 'csurf';
+import { createProxyMiddleware } from 'http-proxy-middleware';
+import url from 'url';
 import { User } from './entities/user';
 import { Site, ProxyTypes } from './entities/site';
+
+async function openCors(req: Request, res: Response, next: () => void) {
+	const origin = req.get('origin');
+	if (!origin) {
+		return next();
+	}
+	const parsedOrigin = url.parse(origin);
+	(req as any).site = await getRepository(Site).findOne({
+		domain: parsedOrigin.host!,
+	});
+	if (!(req as any).site) {
+		return next();
+	}
+	res.header('Access-Control-Allow-Origin', origin);
+	res.header(
+		'Access-Control-Allow-Headers',
+		'Origin, X-Requested-With, Content-Type, Accept',
+	);
+	res.header('Access-Control-Allow-Credentials', 'true');
+	if (req.method === 'OPTIONS') {
+		res.sendStatus(204);
+	} else {
+		next();
+	}
+}
 
 function ensureLoggedIn(req: Request, res: Response, next: () => void) {
 	if (req.isAuthenticated()) {
 		return next();
 	}
 
-	return res.redirect('/login');
+	return res.redirect(`/login?redirectUrl=${req.path}`);
 }
 
 const ensureIsAdmin = (req: Request, res: Response, next: () => void) =>
@@ -259,6 +286,86 @@ export default function addAppRoutes(app: Express) {
 			user: req.user,
 			users: await getUsers(getRepository(User), req.user!),
 			csrfToken: req.csrfToken(),
+		});
+	});
+
+	app.use(
+		'/github/*',
+		openCors,
+		async (req, res, next) => {
+			if (!req.user) {
+				return res
+					.status(401)
+					.json({ message: 'Not authorized' })
+					.end();
+			}
+			const requestFilter = /^\/github\/((git|contents|pulls|branches|merges|statuses|compare|commits)\/?|(issues\/(\d+)\/labels))/;
+			if (!requestFilter.test(req.originalUrl)) {
+				return res.status(403).json({ message: 'forbidden' }).end();
+			}
+			const siteDomain = (req as any).site.domain;
+			const site = siteDomain
+				? await getRepository(Site).findOne({
+						where: { domain: siteDomain },
+						relations: ['editors'],
+				  })
+				: undefined;
+			if (!site?.editors?.find((editor) => editor.id === req.user!.id)) {
+				return res
+					.status(401)
+					.json({ message: 'Not authorized' })
+					.end();
+			}
+			(req as any).site = {
+				repository: site.repository,
+				accessToken: site.accessToken,
+			};
+			next();
+		},
+		createProxyMiddleware({
+			router: (req) =>
+				(req as any).site.repository.replace(
+					'https://github.com',
+					'https://api.github.com/repos',
+				),
+			pathRewrite: { '^/github': '' },
+			target: 'https://api.github.com',
+			changeOrigin: true,
+			onProxyReq: (proxyReq, req) => {
+				proxyReq.setHeader(
+					'Authorization',
+					`Bearer ${(req as any).site.accessToken}`,
+				);
+			},
+			onProxyRes: (proxyRes, req) => {
+				proxyRes.headers['Access-Control-Allow-Origin'] = req.get(
+					'origin',
+				);
+			},
+		}),
+	);
+
+	app.use('/settings', openCors, (req, res) => {
+		if (!req.user) {
+			return res.status(401).json({ message: 'not authorized' }).end();
+		}
+		const site = (req as any).site as Site;
+		res.json({
+			github_enabled: site.proxyType === ProxyTypes.GitHub,
+			gitlab_enabled: site.proxyType === ProxyTypes.GitLab,
+			bitbucket_enabled: site.proxyType === ProxyTypes.Bitbucket,
+			Roles: '',
+		}).end();
+	});
+
+	app.use('/user', openCors, (req, res) => {
+		if (!req.user) {
+			return res.status(401).json({ message: 'not authorized' }).end();
+		}
+		res.json({
+			name: req.user.name,
+			email: req.user.email,
+			profileImage: req.user.profileImage,
 		});
 	});
 }

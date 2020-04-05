@@ -25,6 +25,7 @@
 		"ejs": "^3.0.1",
 		"express": "^4.17.1",
 		"express-session": "^1.17.0",
+		"http-proxy-middleware": "^1.0.3",
 		"openid-client": "^3.14.1",
 		"passport": "^0.4.1",
 		"reflect-metadata": "^0.1.13",
