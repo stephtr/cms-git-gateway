@@ -1,10 +1,9 @@
 backend:
   name: git-gateway
   branch: master
-  identity_url: "http://localhost:3000"
   gateway_url:  "http://localhost:3000"
   site_domain:  "http://localhost:1234"
-  accept_roles: #optional - accepts all users if left out
+  accept_roles: # optional - accepts all users if left out
     - admin
     - editor
 

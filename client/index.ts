@@ -1,4 +1,4 @@
-import yaml from 'js-yaml';
+import { parse as parseYaml } from 'yaml';
 
 declare global {
 	interface Window {
@@ -29,19 +29,24 @@ const callbacks: { [index: string]: Array<(arg?: any) => void> } = {
 	error: [],
 };
 
-function dispatch(event: CallbackType, argument: any) {
+function dispatch(event: CallbackType, argument?: any) {
 	callbacks[event].forEach((cb) => cb(argument));
 }
 
+let gatewayUrl: string | undefined;
 let user: {} | undefined;
+const backgroundUpdateInterval = 60 * 1000;
 
 async function getConfig(configLocation?: string) {
 	const configResponse = await fetch(configLocation || 'config.yml');
 	const yamlString = await configResponse.text();
-	return yaml.load(yamlString);
+	return parseYaml(yamlString);
 }
 
-async function getUser(gatewayUrl: string) {
+async function getUser() {
+	if (!gatewayUrl) {
+		throw Error('gatewayUrl is not set');
+	}
 	const userResponse = await fetch(`${gatewayUrl}/user`, {
 		credentials: 'include',
 	});
@@ -72,25 +77,41 @@ window.netlifyIdentity = {
 	open: () => {},
 	init: () => {},
 	close: () => {},
-	logout: () => {},
+	logout: () => {
+		if (gatewayUrl) {
+			window.location.href = `${gatewayUrl}/logout`;
+		}
+	},
 	currentUser: () => user,
 };
 
+async function backgroundUpdate() {
+	const newUser = await getUser();
+	if (!user && newUser) {
+		dispatch('login', newUser);
+	}
+	if (user && !newUser) {
+		dispatch('logout');
+		window.open(`${gatewayUrl}/login?redirectUrl=${window.location}`);
+	}
+	user = newUser;
+	// eslint-disable-next-line @typescript-eslint/no-misused-promises
+	setTimeout(backgroundUpdate, backgroundUpdateInterval);
+}
+
 async function initialize() {
 	const config = await getConfig();
-	const gatewayUrl = config.backend.gateway_url;
-
-	window.netlifyIdentity.logout = () => {
-		window.location.href = `${gatewayUrl}/logout`;
-	};
-
-	user = await getUser(gatewayUrl);
+	gatewayUrl = config.backend.gateway_url;
+	user = await getUser();
 
 	if (user) {
 		dispatch('login', user);
 	} else {
 		window.location.href = `${gatewayUrl}/login?redirectUrl=${window.location}`;
 	}
+
+	// eslint-disable-next-line @typescript-eslint/no-misused-promises
+	setTimeout(backgroundUpdate, backgroundUpdateInterval);
 }
 
 initialize();

@@ -11,10 +11,10 @@
 		"lint": "cd .. && yarn lint"
 	},
 	"dependencies": {
-		"js-yaml": "^3.13.1"
+		"yaml": "^1.8.3"
 	},
 	"devDependencies": {
-		"@types/js-yaml": "^3.12.3",
+		"@types/yaml": "^1.2.0",
 		"netlify-cms": "^2.10.39",
 		"ts-loader": "^6.2.2",
 		"typescript": "^3.8.3",
