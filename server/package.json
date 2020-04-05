@@ -5,9 +5,11 @@
 	"repository": "https://github.com/stephtr/netlify-gateway-server.git",
 	"author": "Stephan Troyer <stephantroyer@live.at>",
 	"license": "GPL-3.0",
+	"main": "./dist/main.js",
+	"bin": "./dist/main.js",
 	"scripts": {
 		"start": "ts-node-dev main.ts --authServer https://demo.identityserver.io/ --authClientId interactive.public --authPkce --adminSub 11",
-		"build": "tsc main.ts",
+		"build": "tsc -p tsconfig.json",
 		"lint": "cd .. && yarn lint"
 	},
 	"devDependencies": {
