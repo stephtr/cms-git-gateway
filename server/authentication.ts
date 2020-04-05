@@ -12,9 +12,12 @@ import passport from 'passport';
 import session from 'express-session';
 import { getRepository } from 'typeorm';
 import url from 'url';
+import createMemoryStore from 'memorystore';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { User, User as AppUser } from './entities/user';
 import { Site } from './entities/site';
+
+const MemoryStore = createMemoryStore(session);
 
 interface AuthStrategyOptions {
 	server: string;
@@ -130,6 +133,9 @@ export async function setupExpressAuth(
 			secret: 'iowjefowiejf',
 			resave: false,
 			saveUninitialized: true,
+			rolling: true,
+			cookie: { maxAge: 30 * 60 * 1000 },
+			store: new MemoryStore({ checkPeriod: 3600 * 1000 }),
 		}),
 	);
 	app.use(passport.initialize());
