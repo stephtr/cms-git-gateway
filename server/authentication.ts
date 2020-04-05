@@ -5,12 +5,16 @@ import {
 	TokenSet,
 	UserinfoResponse,
 	custom,
+	StrategyOptions,
+	Client,
 } from 'openid-client';
 import passport from 'passport';
 import session from 'express-session';
 import { getRepository } from 'typeorm';
+import url from 'url';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { User, User as AppUser } from './entities/user';
+import { Site } from './entities/site';
 
 interface AuthStrategyOptions {
 	server: string;
@@ -45,7 +49,7 @@ export async function getAuthStrategy({
 	});
 	authClient[custom.clock_tolerance] = 1;
 
-	const strategyOptions = {
+	const strategyOptions: StrategyOptions<Client> = {
 		client: authClient,
 		usePKCE,
 		params: {
@@ -68,14 +72,12 @@ export async function getAuthStrategy({
 				);
 			}
 
-			const existingUser = await getRepository(User).findOne(
-				profile.sub,
-				{
-					select: ['email'],
-				},
-			);
+			const existingUser = await getRepository(User).findOne({
+				where: { email: profile.email },
+				select: ['id'],
+			});
 
-			if (existingUser && existingUser.email !== profile.email) {
+			if (existingUser && existingUser.id !== profile.sub) {
 				return done(
 					new Error(
 						"OIDC: the user's email address is already in use.",
@@ -87,8 +89,9 @@ export async function getAuthStrategy({
 				id: profile.sub,
 				name: profile.name,
 				email: profile.email,
+				profileImage: profile.picture || '',
 				isAdmin: adminSub ? profile.sub === adminSub : false,
-			};
+			} as User;
 
 			getRepository(User).save(user);
 
@@ -158,7 +161,12 @@ export async function setupExpressAuth(
 		})();
 	});
 
-	app.get('/login', passport.authenticate('oidc'));
+	app.get('/login', (req, res) =>
+		passport.authenticate('oidc', { state: req.query.redirectUrl })(
+			req,
+			res,
+		),
+	);
 	app.get('/logout', (req, res) => {
 		req.logout();
 		req.session!.destroy(() => {});
@@ -170,9 +178,26 @@ export async function setupExpressAuth(
 	app.use(
 		'/oidc-callback',
 		passport.authenticate('oidc', {
-			successRedirect: '/',
 			failureRedirect: '/error',
 		}),
+		async (req, res) => {
+			let redirectUrl = req.query.state || '/';
+			if (redirectUrl && !redirectUrl.startsWith('/')) {
+				const parsedUrl = url.parse(redirectUrl);
+				const site = await getRepository(Site).findOne({
+					where: { domain: parsedUrl.host },
+					relations: ['editors'],
+				});
+				if (
+					!req.user ||
+					!site ||
+					!site.editors?.find((user) => user.id === req.user!.id)
+				) {
+					redirectUrl = '/';
+				}
+			}
+			res.redirect(redirectUrl);
+		},
 	);
 }
 
