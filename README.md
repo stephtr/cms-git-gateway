@@ -1,6 +1,6 @@
 # Netlify-gateway-server
 
-*This project is still work in progress. At the moment, only the gateway to GitHub is implemented.*
+*This project is still a bit work in progress, not recommended for use in production. At the moment, only the gateway to GitHub is implemented - GitLab and Bitbucket will follow.*
 
 This project provides an alternative to [Netlify's `git-gateway`](https://github.com/netlify/git-gateway): It provides a gateway to GitHub with the credentials being stored within the gateway. Authentication is being done using an external OAuth server, authorization can be managed within the gateway.
 
