@@ -4,5 +4,5 @@
 		"outDir": "dist",
 		"skipLibCheck": true
 	},
-	"files": ["main.ts"]
+	"files": ["main.ts", "imported-modules.d.ts"]
 }
