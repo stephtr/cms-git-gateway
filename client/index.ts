@@ -101,7 +101,7 @@ async function backgroundUpdate() {
 
 async function initialize() {
 	try {
-		const config = await getConfig();
+		const config = window.CMS_CONFIG || (await getConfig());
 		gatewayUrl = config.backend.gateway_url;
 		user = await getUser();
 
