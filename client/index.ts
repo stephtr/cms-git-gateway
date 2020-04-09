@@ -100,18 +100,22 @@ async function backgroundUpdate() {
 }
 
 async function initialize() {
-	const config = await getConfig();
-	gatewayUrl = config.backend.gateway_url;
-	user = await getUser();
+	try {
+		const config = await getConfig();
+		gatewayUrl = config.backend.gateway_url;
+		user = await getUser();
 
-	if (user) {
-		dispatch('login', user);
-	} else {
-		window.location.href = `${gatewayUrl}/login?redirectUrl=${window.location}`;
+		if (user) {
+			dispatch('login', user);
+		} else {
+			window.location.href = `${gatewayUrl}/login?redirectUrl=${window.location}`;
+		}
+
+		// eslint-disable-next-line @typescript-eslint/no-misused-promises
+		setTimeout(backgroundUpdate, backgroundUpdateInterval);
+	} catch (error) {
+		dispatch('error', error);
 	}
-
-	// eslint-disable-next-line @typescript-eslint/no-misused-promises
-	setTimeout(backgroundUpdate, backgroundUpdateInterval);
 }
 
 initialize();
