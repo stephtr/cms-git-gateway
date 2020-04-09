@@ -5,6 +5,12 @@ const defaultLocalhostUrl = 'http://localhost';
 export interface Arguments {
 	port: number;
 	hostingUrl: string;
+	dbType: 'sqlite' | 'mysql' | 'postgres';
+	dbHost?: string;
+	dbPort?: number;
+	dbUsername?: string;
+	dbPassword?: string;
+	dbDatabase?: string;
 	authServer: string;
 	authClientId: string;
 	authClientSecret: string;
@@ -23,6 +29,38 @@ export function getArguments(): Arguments {
 			type: 'string',
 			default: defaultLocalhostUrl,
 			description: 'Public url of this server',
+		},
+		dbType: {
+			type: 'string',
+			default: 'sqlite',
+			description: 'Database provider to use',
+			choices: ['sqlite', 'mysql', 'postgres'],
+		},
+		dbHost: {
+			type: 'string',
+			required: false,
+			description: 'Hostname of the database server',
+		},
+		dbPort: {
+			type: 'number',
+			required: false,
+			description: 'Port of the database server',
+		},
+		dbUsername: {
+			type: 'string',
+			required: false,
+			description: 'User name for the database server',
+		},
+		dbPassword: {
+			type: 'string',
+			required: false,
+			description: 'Password for the database server',
+		},
+		dbDatabase: {
+			type: 'string',
+			required: false,
+			description:
+				'For SQLite: location of the database file; for others: database to select',
 		},
 		authServer: {
 			type: 'string',

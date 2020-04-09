@@ -9,6 +9,12 @@ import 'reflect-metadata';
 async function Main({
 	port,
 	hostingUrl,
+	dbType,
+	dbHost,
+	dbPort,
+	dbUsername,
+	dbPassword,
+	dbDatabase,
 	authServer,
 	authClientId,
 	authClientSecret,
@@ -17,8 +23,14 @@ async function Main({
 }: Arguments) {
 	try {
 		await createConnection({
-			type: 'sqlite',
-			database: 'db.sqlite',
+			type: dbType,
+			host: dbHost,
+			port: dbPort,
+			username: dbUsername,
+			password: dbPassword,
+			database:
+				dbDatabase ??
+				(dbType === 'sqlite' ? 'db.sqlite' : 'git-gateway'),
 			entities: ['entities/**/*.ts'],
 			migrations: ['migrations/**/*.ts'],
 			synchronize: true,

@@ -1,18 +1,18 @@
 # Netlify-gateway-server
 
-*This project is still a bit work in progress, not recommended for use in production. At the moment, only the gateway to GitHub is implemented - GitLab and Bitbucket will follow.*
+_This project is still a bit work in progress, not recommended for use in production. At the moment, only the gateway to GitHub is implemented - GitLab and Bitbucket will follow._
 
 This project provides an alternative to [Netlify's `git-gateway`](https://github.com/netlify/git-gateway): It provides a gateway to GitHub with the credentials being stored within the gateway. Authentication is being done using an external OAuth server, authorization can be managed within the gateway.
 
 The main difference is that this project provides an integrated user management interface (which is restricted to administrators) for assigning different access rights to different users for different websites.
 
 ![Screenshot of the user management page](images/screenshot-userManagement.png)
-*Screenshot of the user management page*
+_Screenshot of the user management page_
 
 Users will be automatically added to the user list once they login. They can then be promoted as administrators at the user management page.
 
 ![Screenshot of the access control page](images/screenshot-accessControl.png)
-*Screenshot of the website management page*
+_Screenshot of the website management page_
 
 On the website management page new Netlify websites can be added, together with the baking repository the gateway should refer to and the necessary access token. If you would like to register a second website using the same access token, you can clone existing sites. Write access to the site's repository via the gateway can be granted via the "Add User" button - this function is limited to users, which have already logged in the gateway once.
 
@@ -30,6 +30,12 @@ The gateway server can be simply run via node and customized by command line arg
 | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | `--port 3000`                                 | Port which the gateway server should listen on                                                                       |
 | `--hostingUrl http://localhost`               | Public url of the gateway server                                                                                     |
+| `--dbType`                                    | Database provider to use (`sqlite`, `mysql` or `postgres`)                                                           |
+| `--dbHost`                                    | Hostname of the database server                                                                                      |
+| `--dbPort`                                    | Port of the database server                                                                                          |
+| `--dbUsername`                                | User name for the database server                                                                                    |
+| `--dbPassword`                                | Password for the database server                                                                                     |
+| `--dbDatabase`                                | For SQLite: location of the database file; for others: database to select                                            |
 | `--authServer https://demo.identityserver.io` | Url of the external OAuth server                                                                                     |
 | `--authClientId interactive.public`           | `client_id` for accessing the OAuth server                                                                           |
 | `--authClientSecret sEcREt123`                | `client_secret` for accessing the OAuth server                                                                       |
