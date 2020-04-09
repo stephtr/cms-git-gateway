@@ -1,9 +1,9 @@
 {
-	"name": "netlify-gateway-root",
+	"name": "cms-git-gateway-root",
 	"version": "0.0.0",
 	"private": true,
 	"description": "This project provides a gateway to Git APIs, which can be configured per repository and combined with OAuth.",
-	"repository": "https://github.com/stephtr/netlify-gateway-server.git",
+	"repository": "https://github.com/stephtr/cms-git-gateway.git",
 	"author": "Stephan Troyer <stephantroyer@live.at>",
 	"license": "GPL-3.0",
 	"workspaces": [

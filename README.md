@@ -1,8 +1,8 @@
-# Netlify-gateway-server
+# CMS Git gateway
 
 _This project is still a bit work in progress, not recommended for use in production. At the moment, only the gateway to GitHub is implemented - GitLab and Bitbucket will follow._
 
-This project provides an alternative to [Netlify's `git-gateway`](https://github.com/netlify/git-gateway): It provides a gateway to GitHub with the credentials being stored within the gateway. Authentication is being done using an external OAuth server, authorization can be managed within the gateway.
+This project provides an alternative to [Netlify's `git-gateway`](https://github.com/netlify/git-gateway): It provides a gateway to Git repositories with the credentials being stored within the gateway. Authentication is being done using an external OAuth server, authorization can be managed within the gateway.
 
 The main difference is that this project provides an integrated user management interface (which is restricted to administrators) for assigning different access rights to different users for different websites.
 
@@ -14,13 +14,13 @@ Users will be automatically added to the user list once they login. They can the
 ![Screenshot of the access control page](images/screenshot-accessControl.png)
 _Screenshot of the website management page_
 
-On the website management page new Netlify websites can be added, together with the baking repository the gateway should refer to and the necessary access token. If you would like to register a second website using the same access token, you can clone existing sites. Write access to the site's repository via the gateway can be granted via the "Add User" button - this function is limited to users, which have already logged in the gateway once.
+On the website management page new websites can be added, together with the baking repository the gateway should refer to and the necessary access token. If you would like to register a second website using the same access token, you can clone existing sites. Write access to the site's repository via the gateway can be granted via the "Add User" button - this function is limited to users, which have already logged in the gateway once.
 
 ---
 
 ## Setup
 
-The project consists of two different parts, the server application and a client extension.
+The project consists of two different parts, the server application (`cms-git-gateway`) and a client extension for supporting Netlify (`cms-git-gateway-netlify`).
 
 ### Server
 
@@ -42,7 +42,7 @@ The gateway server can be simply run via node and customized by command line arg
 | `--authPkce`                                  | With this flag being set, PKCE will be used for accessing the OAuth server.                                          |
 | `--adminSub 11`                               | For testing purposes and initial setup, admin rights can be granted to the external OAuth user with the given `sub`. |
 
-### Client
+### Netlify extension (client)
 
 First, setup the Netlify admin interface following [Netlify's guide](https://www.netlifycms.org/docs/add-to-your-site/).
 
@@ -60,8 +60,7 @@ In addition, you have to include this project's client code to your admin's `ind
 
 ```html
 <!-- Include the script, which injects changes necessary for accessing our gateway server -->
-<!-- TODO: edit this URL -->
-<script src="https://unpkg.com/CHANGEME-this-project"></script>
+<script src="https://unpkg.com/cms-git-gateway-netlify"></script>
 
 <!-- Include the script that builds the page and powers Netlify CMS -->
 <script src="https://unpkg.com/netlify-cms@^2.0.0/dist/netlify-cms.js"></script>

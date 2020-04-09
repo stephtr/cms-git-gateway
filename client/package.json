@@ -1,10 +1,11 @@
 {
-	"name": "netlify-gateway-client",
-	"version": "0.0.0",
+	"name": "cms-git-gateway-netlify",
+	"version": "0.1.0",
 	"description": "This project provides a gateway to Git APIs, which can be configured per repository and combined with OAuth.",
-	"repository": "https://github.com/stephtr/netlify-gateway-server.git",
+	"repository": "https://github.com/stephtr/cms-git-gateway.git",
 	"author": "Stephan Troyer <stephantroyer@live.at>",
 	"license": "GPL-3.0",
+	"main": "dist/index.js",
 	"scripts": {
 		"start": "webpack-dev-server --config ./webpack.config.dev.js",
 		"build": "webpack --config ./webpack.config.js",
