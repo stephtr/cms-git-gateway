@@ -61,6 +61,7 @@ const getUsers = async (repository: Repository<User>, currentUser: User) =>
 
 export default function addAppRoutes(app: Express) {
 	const csrfProtection = csrf();
+	app.set('views', `${__dirname}/views`);
 	app.set('view engine', 'ejs');
 
 	app.use('/error', (req, res) =>

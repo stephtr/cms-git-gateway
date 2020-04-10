@@ -69,7 +69,7 @@ export function getArguments(): Arguments {
 		},
 		authClientId: {
 			type: 'string',
-			default: 'netlify-gateway-server',
+			default: 'cms-git-gateway',
 			description: 'client_id for accessing the Auth server',
 		},
 		authClientSecret: {

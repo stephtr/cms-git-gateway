@@ -31,8 +31,14 @@ async function Main({
 			database:
 				dbDatabase ??
 				(dbType === 'sqlite' ? 'db.sqlite' : 'git-gateway'),
-			entities: ['entities/**/*.ts'],
-			migrations: ['migrations/**/*.ts'],
+			entities: [
+				`${__dirname}/entities/**/*.ts`,
+				`${__dirname}/entities/**/*.js`,
+			],
+			migrations: [
+				`${__dirname}/migrations/**/*.ts`,
+				`${__dirname}/migrations/**/*.js`,
+			],
 			synchronize: true,
 		});
 

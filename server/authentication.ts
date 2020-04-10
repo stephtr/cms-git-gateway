@@ -93,7 +93,9 @@ export async function getAuthStrategy({
 				name: profile.name,
 				email: profile.email,
 				profileImage: profile.picture || '',
-				isAdmin: adminSub ? profile.sub === adminSub : false,
+				isAdmin:
+					existingUser?.isAdmin ||
+					(adminSub && profile.sub === adminSub),
 			} as User;
 
 			getRepository(User).save(user);
