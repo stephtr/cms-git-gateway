@@ -4,7 +4,7 @@
 
 -   Fix CORS headers from blocking some git operations
 -   Fix automatic logout
--   Improve client to support `local_backend`
+-   enable `local_backend` support
 
 ## 0.1.1
 
