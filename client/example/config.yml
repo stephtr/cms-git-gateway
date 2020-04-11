@@ -2,12 +2,12 @@ backend:
   name: git-gateway
   branch: master
   gateway_url:  "http://localhost:3000"
-  site_domain:  "http://localhost:1234"
+  site_domain:  "http://localhost:8080"
   accept_roles: # optional - accepts all users if left out
     - admin
     - editor
 
-publish_mode: editorial_workflow # Editorial Workflow
+publish_mode: simple
 
 media_folder: "images/uploads" # Media files will be stored in the repo under images/uploads
 
