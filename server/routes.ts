@@ -23,6 +23,10 @@ async function openCors(req: Request, res: Response, next: () => void) {
 		'Access-Control-Allow-Headers',
 		'Origin, X-Requested-With, Content-Type, Accept',
 	);
+	res.header(
+		'Access-Control-Allow-Methods',
+		'POST, GET, OPTIONS, PATCH, PUT, DELETE',
+	);
 	res.header('Access-Control-Allow-Credentials', 'true');
 	if (req.method === 'OPTIONS') {
 		res.sendStatus(204);

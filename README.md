@@ -29,7 +29,7 @@ The gateway server can be simply run via node and customized by command line arg
 | Argument                                      | Description                                                                                                          |
 | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | `--port 3000`                                 | Port which the gateway server should listen on                                                                       |
-| `--hostingUrl http://localhost`               | Public url of the gateway server                                                                                     |
+| `--hostingUrl http://localhost:3000`          | Public url of the gateway server                                                                                     |
 | `--dbType`                                    | Database provider to use (`sqlite`, `mysql` or `postgres`)                                                           |
 | `--dbHost`                                    | Hostname of the database server                                                                                      |
 | `--dbPort`                                    | Port of the database server                                                                                          |
@@ -41,6 +41,9 @@ The gateway server can be simply run via node and customized by command line arg
 | `--authClientSecret sEcREt123`                | `client_secret` for accessing the OAuth server                                                                       |
 | `--authPkce`                                  | With this flag being set, PKCE will be used for accessing the OAuth server.                                          |
 | `--adminSub 11`                               | For testing purposes and initial setup, admin rights can be granted to the external OAuth user with the given `sub`. |
+
+The provided authentication server has to support the authorization code flow and has to provide the scopes `openid`, `profile` and `email`.
+The redirection url used by this server is `${hostingUrl}/oidc-callback`.
 
 ### Netlify extension (client)
 
@@ -56,7 +59,7 @@ backend:
     site_domain: http://domain-of-the-client.com
 ```
 
-In addition, you have to include this project's client code to your admin's `index.html` file. Make sure, that you include it before the `netlify-cms` import:
+In addition, you have to include this project's client code in your admin's `index.html` file. Make sure, that you include it before the `netlify-cms` import:
 
 ```html
 <!-- Include the script, which injects changes necessary for accessing our gateway server -->
