@@ -101,11 +101,18 @@ async function backgroundUpdate() {
 
 async function initialize() {
 	try {
+		const config = window.CMS_CONFIG || (await getConfig());
+
+		if (config.local_backend) {
+			// local operation, therefore no authentication necessary
+			return;
+		}
+
 		if (window.localStorage) {
+			// remove cached login information since we do authentication by ourselves
 			window.localStorage.removeItem('netlify-cms-user');
 		}
 
-		const config = window.CMS_CONFIG || (await getConfig());
 		gatewayUrl = config.backend.gateway_url;
 		user = await getUser();
 
