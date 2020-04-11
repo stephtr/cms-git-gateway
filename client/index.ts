@@ -101,6 +101,10 @@ async function backgroundUpdate() {
 
 async function initialize() {
 	try {
+		if (window.localStorage) {
+			window.localStorage.removeItem('netlify-cms-user');
+		}
+
 		const config = window.CMS_CONFIG || (await getConfig());
 		gatewayUrl = config.backend.gateway_url;
 		user = await getUser();
