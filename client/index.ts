@@ -1,4 +1,4 @@
-import { parse as parseYaml } from 'yaml';
+import yaml from 'yaml';
 
 declare global {
 	interface Window {
@@ -21,12 +21,13 @@ window.fetch = (resource: RequestInfo, init?: any) => {
 	return nativeFetch(resource, init);
 };
 
-type CallbackType = 'login' | 'logout' | 'error';
+type CallbackType = 'login' | 'logout' | 'error' | 'init';
 
 const callbacks: { [index: string]: Array<(arg?: any) => void> } = {
 	login: [],
 	logout: [],
 	error: [],
+	init: [],
 };
 
 function dispatch(event: CallbackType, argument?: any) {
@@ -40,7 +41,7 @@ const backgroundUpdateInterval = 60 * 1000;
 async function getConfig(configLocation?: string) {
 	const configResponse = await fetch(configLocation || 'config.yml');
 	const yamlString = await configResponse.text();
-	return parseYaml(yamlString);
+	return yaml.parse(yamlString);
 }
 
 async function getUser() {
@@ -125,6 +126,8 @@ async function initialize() {
 		// eslint-disable-next-line @typescript-eslint/no-misused-promises
 		setTimeout(backgroundUpdate, backgroundUpdateInterval);
 	} catch (error) {
+		// eslint-disable-next-line no-console
+		console.error(error);
 		dispatch('error', error);
 	}
 }

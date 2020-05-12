@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.1.3
+
+-   (Server) Fix login bug for new users
+-   (Client) Compatibility with newer netlify versions
+
 ## 0.1.2
 
 -   Fix CORS headers from blocking some git operations

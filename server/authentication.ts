@@ -95,7 +95,8 @@ export async function getAuthStrategy({
 				profileImage: profile.picture || '',
 				isAdmin:
 					existingUser?.isAdmin ||
-					(adminSub && profile.sub === adminSub),
+					(adminSub && profile.sub === adminSub) ||
+					false,
 			} as User;
 
 			getRepository(User).save(user);
@@ -170,10 +171,9 @@ export async function setupExpressAuth(
 	});
 
 	app.get('/login', (req, res) =>
-		passport.authenticate('oidc', { state: req.query.redirectUrl })(
-			req,
-			res,
-		),
+		passport.authenticate('oidc', {
+			state: req.query.redirectUrl as string,
+		})(req, res),
 	);
 	app.get('/logout', (req, res) => {
 		req.logout();
@@ -189,7 +189,7 @@ export async function setupExpressAuth(
 			failureRedirect: '/error',
 		}),
 		async (req, res) => {
-			let redirectUrl = req.query.state || '/';
+			let redirectUrl: string = (req.query.state as string) || '/';
 			if (redirectUrl && !redirectUrl.startsWith('/')) {
 				const parsedUrl = url.parse(redirectUrl);
 				const site = await getRepository(Site).findOne({
