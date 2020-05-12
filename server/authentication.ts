@@ -118,6 +118,7 @@ interface AuthSetupOptions {
 	usePKCE?: boolean;
 	hostingUrl: string;
 	adminSub?: string;
+	useProxy?: boolean;
 }
 
 export async function setupExpressAuth(
@@ -129,6 +130,7 @@ export async function setupExpressAuth(
 		usePKCE,
 		hostingUrl,
 		adminSub,
+		useProxy,
 	}: AuthSetupOptions,
 ) {
 	app.use(
@@ -137,7 +139,13 @@ export async function setupExpressAuth(
 			resave: false,
 			saveUninitialized: true,
 			rolling: true,
-			cookie: { maxAge: 30 * 60 * 1000 },
+			proxy: useProxy,
+			cookie: {
+				maxAge: 30 * 60 * 1000,
+				sameSite: 'none',
+				httpOnly: true,
+				secure: true,
+			},
 			store: new MemoryStore({ checkPeriod: 3600 * 1000 }),
 		}),
 	);

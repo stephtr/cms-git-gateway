@@ -15,6 +15,7 @@ export interface Arguments {
 	authClientId: string;
 	authClientSecret: string;
 	authPkce: boolean;
+	useProxy?: boolean;
 	adminSub?: string;
 }
 
@@ -79,6 +80,11 @@ export function getArguments(): Arguments {
 		authPkce: {
 			type: 'boolean',
 			description: 'Whether PKCE should be used for authentication',
+		},
+		useProxy: {
+			type: 'boolean',
+			default: false,
+			description: 'Whether Node should trust the `X-Forwarded-Proto` field',
 		},
 		adminSub: {
 			type: 'string',

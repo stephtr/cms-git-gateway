@@ -19,6 +19,7 @@ async function Main({
 	authClientId,
 	authClientSecret,
 	authPkce,
+	useProxy,
 	adminSub,
 }: Arguments) {
 	try {
@@ -51,6 +52,7 @@ async function Main({
 			clientId: authClientId,
 			clientSecret: authClientSecret,
 			usePKCE: authPkce,
+			useProxy,
 			hostingUrl,
 			adminSub,
 		});

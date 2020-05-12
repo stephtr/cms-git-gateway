@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.1.7
+
+-   Update cookie policy
+-   Add `useProxy` argument
+
 ## 0.1.3
 
 -   (Server) Fix login bug for new users

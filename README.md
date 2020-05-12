@@ -40,6 +40,7 @@ The gateway server can be simply run via node and customized by command line arg
 | `--authClientId interactive.public`           | `client_id` for accessing the OAuth server                                                                           |
 | `--authClientSecret sEcREt123`                | `client_secret` for accessing the OAuth server                                                                       |
 | `--authPkce`                                  | With this flag being set, PKCE will be used for accessing the OAuth server.                                          |
+| `--useProxy`                                  | When running behind a reverse proxy like nginx, this flag tells the server to trust the `X-Forwarded-Proto` header.  |
 | `--adminSub 11`                               | For testing purposes and initial setup, admin rights can be granted to the external OAuth user with the given `sub`. |
 
 The provided authentication server has to support the authorization code flow and has to provide the scopes `openid`, `profile` and `email`.
