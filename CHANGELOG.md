@@ -2,13 +2,13 @@
 
 ## 0.1.8
 
--   Fix administration loss bug
--   Remove sameSite policy until supported by `express-session`
+-   (Server) Fix administration loss bug
+-   (Server) Remove sameSite policy until supported by `express-session`
 
 ## 0.1.7
 
--   Update cookie policy
--   Add `useProxy` argument
+-   (Server) Update cookie policy
+-   (Server) Add `useProxy` argument
 
 ## 0.1.3
 
