@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.1.8
+
+-   Fix administration loss bug
+-   Remove sameSite policy until supported by `express-session`
+
 ## 0.1.7
 
 -   Update cookie policy
