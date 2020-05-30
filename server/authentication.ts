@@ -142,7 +142,8 @@ export async function setupExpressAuth(
 			proxy: useProxy,
 			cookie: {
 				maxAge: 30 * 60 * 1000,
-				sameSite: 'none',
+				// disable `sameSite` property until `express-session` accepts user agent sniffing for dealing with Safari
+				// sameSite: 'none',
 				httpOnly: true,
 				secure: true,
 			},
