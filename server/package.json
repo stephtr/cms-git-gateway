@@ -1,6 +1,6 @@
 {
 	"name": "cms-git-gateway",
-	"version": "0.1.8",
+	"version": "0.1.9",
 	"description": "This project provides a gateway to Git APIs, which can be configured per repository and combined with OAuth.",
 	"repository": "https://github.com/stephtr/cms-git-gateway.git",
 	"author": "Stephan Troyer <stephantroyer@live.at>",
@@ -35,6 +35,7 @@
 		"passport": "^0.4.1",
 		"pg": "^8.0.0",
 		"reflect-metadata": "^0.1.13",
+		"should-send-same-site-none": "^2.0.5",
 		"sqlite3": "^4.1.1",
 		"typeorm": "^0.2.24",
 		"yargs": "^15.3.1"

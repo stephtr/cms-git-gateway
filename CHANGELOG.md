@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.1.9
+
+-   (Server) Fix sameSite policy using user agent sniffing
+
 ## 0.1.8
 
 -   (Server) Fix administration loss bug

@@ -13,6 +13,7 @@ import session from 'express-session';
 import { getRepository } from 'typeorm';
 import url from 'url';
 import createMemoryStore from 'memorystore';
+import { shouldSendSameSiteNone } from 'should-send-same-site-none';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { User, User as AppUser } from './entities/user';
 import { Site } from './entities/site';
@@ -140,6 +141,7 @@ export async function setupExpressAuth(
 		useProxy,
 	}: AuthSetupOptions,
 ): Promise<void> {
+	app.use(shouldSendSameSiteNone);
 	app.use(
 		session({
 			secret: 'iowjefowiejf',
@@ -149,10 +151,9 @@ export async function setupExpressAuth(
 			proxy: useProxy,
 			cookie: {
 				maxAge: 30 * 60 * 1000,
-				// disable `sameSite` property until `express-session` accepts user agent sniffing for dealing with Safari
-				// sameSite: 'none',
+				sameSite: 'none',
 				httpOnly: true,
-				// secure: true,
+				secure: 'auto',
 			},
 			store: new MemoryStore({ checkPeriod: 3600 * 1000 }),
 		}),
