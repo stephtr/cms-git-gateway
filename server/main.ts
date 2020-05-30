@@ -6,7 +6,7 @@ import addAppRoutes from './routes';
 import { setupExpressAuth } from './authentication';
 import 'reflect-metadata';
 
-async function Main({
+async function main({
 	port,
 	hostingUrl,
 	dbType,
@@ -69,4 +69,5 @@ async function Main({
 	}
 }
 
-Main(getArguments());
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
+main(getArguments());

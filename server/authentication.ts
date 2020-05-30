@@ -37,7 +37,10 @@ export async function getAuthStrategy({
 	callbackUrl,
 	logoutUrl,
 	adminSub,
-}: AuthStrategyOptions) {
+}: AuthStrategyOptions): Promise<{
+	authStrategy: Strategy<User, Client>;
+	authClient: Client;
+}> {
 	Issuer[custom.http_options] = (options) => ({ ...options, timeout: 10000 });
 	const authIssuer = await Issuer.discover(server);
 	const authClient = new authIssuer.Client({
@@ -66,6 +69,7 @@ export async function getAuthStrategy({
 		profile: UserinfoResponse,
 		done: (error?: Error | null, user?: any) => void,
 	) => {
+		// eslint-disable-next-line @typescript-eslint/no-floating-promises
 		(async () => {
 			if (!profile.email_verified) {
 				return done(
@@ -99,7 +103,10 @@ export async function getAuthStrategy({
 					false,
 			} as User;
 
-			getRepository(User).save(user);
+			getRepository(User)
+				.save(user)
+				// eslint-disable-next-line no-console
+				.catch(() => console.error(`Couldn't save user ${user.id}`));
 
 			return done(null, user);
 		})();
@@ -132,7 +139,7 @@ export async function setupExpressAuth(
 		adminSub,
 		useProxy,
 	}: AuthSetupOptions,
-) {
+): Promise<void> {
 	app.use(
 		session({
 			secret: 'iowjefowiejf',
@@ -169,14 +176,12 @@ export async function setupExpressAuth(
 	});
 
 	passport.deserializeUser<User, string>((userId, done) => {
-		(async () => {
-			try {
-				const user = await getRepository(User).findOneOrFail(userId);
-				return done(null, user);
-			} catch (error) {
-				return done(error);
-			}
-		})();
+		getRepository(User)
+			.findOneOrFail(userId)
+			.then(
+				(user) => done(null, user),
+				(error) => done(error),
+			);
 	});
 
 	app.get('/login', (req, res) =>

@@ -84,7 +84,8 @@ export function getArguments(): Arguments {
 		useProxy: {
 			type: 'boolean',
 			default: false,
-			description: 'Whether Node should trust the `X-Forwarded-Proto` field',
+			description:
+				'Whether Node should trust the `X-Forwarded-Proto` field',
 		},
 		adminSub: {
 			type: 'string',

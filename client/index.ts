@@ -35,7 +35,7 @@ function dispatch(event: CallbackType, argument?: any) {
 }
 
 let gatewayUrl: string | undefined;
-let user: {} | undefined;
+let user: Record<string, unknown> | undefined;
 const backgroundUpdateInterval = 60 * 1000;
 
 async function getConfig(configLocation?: string) {
@@ -88,12 +88,15 @@ window.netlifyIdentity = {
 
 async function backgroundUpdate() {
 	const newUser = await getUser();
+	if (!gatewayUrl) return;
 	if (!user && newUser) {
 		dispatch('login', newUser);
 	}
 	if (user && !newUser) {
 		dispatch('logout');
-		window.open(`${gatewayUrl}/login?redirectUrl=${window.location}`);
+		window.open(
+			`${gatewayUrl}/login?redirectUrl=${window.location.href as string}`,
+		);
 	}
 	user = newUser;
 	// eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -115,12 +118,17 @@ async function initialize() {
 		}
 
 		gatewayUrl = config.backend.gateway_url;
+		if (!gatewayUrl) {
+			throw new Error('`gatewayUrl` needs to be set.');
+		}
 		user = await getUser();
 
 		if (user) {
 			dispatch('login', user);
 		} else {
-			window.location.href = `${gatewayUrl}/login?redirectUrl=${window.location}`;
+			window.location.href = `${gatewayUrl}/login?redirectUrl=${
+				window.location.href as string
+			}`;
 		}
 
 		// eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -132,6 +140,7 @@ async function initialize() {
 	}
 }
 
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 initialize();
 
 export default undefined;

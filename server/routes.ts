@@ -63,7 +63,7 @@ const getUsers = async (repository: Repository<User>, currentUser: User) =>
 		(a, b) => +(b.id === currentUser.id) - +(a.id === currentUser.id),
 	);
 
-export default function addAppRoutes(app: Express) {
+export default function addAppRoutes(app: Express): void {
 	const csrfProtection = csrf();
 	app.set('views', `${__dirname}/views`);
 	app.set('view engine', 'ejs');
@@ -339,6 +339,7 @@ export default function addAppRoutes(app: Express) {
 			onProxyReq: (proxyReq, req) => {
 				proxyReq.setHeader(
 					'Authorization',
+					// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
 					`Bearer ${(req as any).site.accessToken}`,
 				);
 			},
