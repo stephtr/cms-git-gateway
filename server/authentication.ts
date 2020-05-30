@@ -81,7 +81,7 @@ export async function getAuthStrategy({
 
 			const existingUser = await getRepository(User).findOne({
 				where: { email: profile.email },
-				select: ['id'],
+				select: ['id', 'isAdmin'],
 			});
 
 			if (existingUser && existingUser.id !== profile.sub) {
@@ -152,7 +152,7 @@ export async function setupExpressAuth(
 				// disable `sameSite` property until `express-session` accepts user agent sniffing for dealing with Safari
 				// sameSite: 'none',
 				httpOnly: true,
-				secure: true,
+				// secure: true,
 			},
 			store: new MemoryStore({ checkPeriod: 3600 * 1000 }),
 		}),

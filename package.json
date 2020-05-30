@@ -27,5 +27,8 @@
 		"pre-commit": "^1.2.2",
 		"prettier": "^2.0.2",
 		"typescript": "^3.8.3"
+	},
+	"resolutions": {
+		"tslib": "1.11.2"
 	}
 }
