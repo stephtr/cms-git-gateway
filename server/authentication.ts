@@ -14,6 +14,7 @@ import { getRepository } from 'typeorm';
 import url from 'url';
 import createMemoryStore from 'memorystore';
 import { shouldSendSameSiteNone } from 'should-send-same-site-none';
+import rateLimit from 'express-rate-limit';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { User, User as AppUser } from './entities/user';
 import { Site } from './entities/site';
@@ -127,6 +128,7 @@ interface AuthSetupOptions {
 	hostingUrl: string;
 	adminSub?: string;
 	useProxy?: boolean;
+	sessionSecret?: string;
 }
 
 export async function setupExpressAuth(
@@ -139,12 +141,18 @@ export async function setupExpressAuth(
 		hostingUrl,
 		adminSub,
 		useProxy,
+		sessionSecret = 'iowjefowiejf',
 	}: AuthSetupOptions,
 ): Promise<void> {
+	const apiLimiter = rateLimit({
+		windowMs: 15 * 60 * 1000,
+		max: 100,
+	});
+
 	app.use(shouldSendSameSiteNone);
 	app.use(
 		session({
-			secret: 'iowjefowiejf',
+			secret: sessionSecret,
 			resave: false,
 			saveUninitialized: true,
 			rolling: true,
@@ -185,7 +193,7 @@ export async function setupExpressAuth(
 			);
 	});
 
-	app.get('/login', (req, res) =>
+	app.get('/login', apiLimiter, (req, res) =>
 		passport.authenticate('oidc', {
 			state: req.query.redirectUrl as string,
 		})(req, res),
@@ -200,12 +208,16 @@ export async function setupExpressAuth(
 
 	app.use(
 		'/oidc-callback',
+		apiLimiter,
 		passport.authenticate('oidc', {
 			failureRedirect: '/error',
 		}),
 		async (req, res) => {
 			let redirectUrl: string = (req.query.state as string) || '/';
-			if (redirectUrl && !redirectUrl.startsWith('/')) {
+			const isExternalUrl =
+				redirectUrl &&
+				(!redirectUrl.startsWith('/') || redirectUrl.startsWith('//'));
+			if (isExternalUrl) {
 				const parsedUrl = url.parse(redirectUrl);
 				const site = await getRepository(Site).findOne({
 					where: { domain: parsedUrl.host },

@@ -16,6 +16,7 @@ export interface Arguments {
 	authClientSecret: string;
 	authPkce: boolean;
 	useProxy?: boolean;
+	sessionSecret?: string;
 	adminSub?: string;
 }
 
@@ -86,6 +87,11 @@ export function getArguments(): Arguments {
 			default: false,
 			description:
 				'Whether Node should trust the `X-Forwarded-Proto` field',
+		},
+		sessionSecret: {
+			type: 'string',
+			required: false,
+			description: "(Random) secret for protecting the clients' sessions",
 		},
 		adminSub: {
 			type: 'string',

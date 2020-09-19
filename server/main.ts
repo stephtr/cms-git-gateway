@@ -20,6 +20,7 @@ async function main({
 	authClientSecret,
 	authPkce,
 	useProxy,
+	sessionSecret,
 	adminSub,
 }: Arguments) {
 	try {
@@ -55,6 +56,7 @@ async function main({
 			useProxy,
 			hostingUrl,
 			adminSub,
+			sessionSecret,
 		});
 
 		addAppRoutes(app);
