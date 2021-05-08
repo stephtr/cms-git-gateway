@@ -39,7 +39,7 @@
 		"reflect-metadata": "^0.1.13",
 		"should-send-same-site-none": "^2.0.5",
 		"sqlite3": "^4.1.1",
-		"typeorm": "^0.2.24",
+		"typeorm": "^0.2.25",
 		"yargs": "^15.3.1"
 	}
 }
