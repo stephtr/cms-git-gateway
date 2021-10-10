@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.1.10
+
+-   (Server) Added MySQL SSL support
+
 ## 0.1.9
 
 -   (Server) Fix sameSite policy using user agent sniffing
