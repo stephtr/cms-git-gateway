@@ -65,7 +65,7 @@ export function getArguments(): Arguments {
 			description:
 				'For SQLite: location of the database file; for others: database to select',
 		},
-		dbDatabase: {
+		dbSsl: {
 			type: 'boolean',
 			required: false,
 			description:
