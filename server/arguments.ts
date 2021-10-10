@@ -11,6 +11,7 @@ export interface Arguments {
 	dbUsername?: string;
 	dbPassword?: string;
 	dbDatabase?: string;
+	dbSsl?: boolean;
 	authServer: string;
 	authClientId: string;
 	authClientSecret: string;
@@ -63,6 +64,12 @@ export function getArguments(): Arguments {
 			required: false,
 			description:
 				'For SQLite: location of the database file; for others: database to select',
+		},
+		dbDatabase: {
+			type: 'boolean',
+			required: false,
+			description:
+				'For MySQL: whether SSL should be used for the database connection',
 		},
 		authServer: {
 			type: 'string',

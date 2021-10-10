@@ -36,6 +36,7 @@ The gateway server can be simply run via node and customized by command line arg
 | `--dbUsername`                                | User name for the database server                                                                                    |
 | `--dbPassword`                                | Password for the database server                                                                                     |
 | `--dbDatabase`                                | For SQLite: location of the database file; for others: database to select                                            |
+| `--dbSsl`                                     | For MySQL: whether SSL should be used for the database connection                                                    |
 | `--authServer https://demo.identityserver.io` | Url of the external OAuth server                                                                                     |
 | `--authClientId interactive.public`           | `client_id` for accessing the OAuth server                                                                           |
 | `--authClientSecret sEcREt123`                | `client_secret` for accessing the OAuth server                                                                       |

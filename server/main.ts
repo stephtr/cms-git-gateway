@@ -15,6 +15,7 @@ async function main({
 	dbUsername,
 	dbPassword,
 	dbDatabase,
+	dbSsl,
 	authServer,
 	authClientId,
 	authClientSecret,
@@ -33,6 +34,7 @@ async function main({
 			database:
 				dbDatabase ??
 				(dbType === 'sqlite' ? 'db.sqlite' : 'git-gateway'),
+			ssl: dbSsl ? { rejectUnauthorized: false } : undefined,
 			entities: [
 				`${__dirname}/entities/**/*.ts`,
 				`${__dirname}/entities/**/*.js`,
