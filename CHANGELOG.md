@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.1.14
+
+-   Updated dependencies
+
 ## 0.1.13
 
 -   (Server) Added MySQL SSL support

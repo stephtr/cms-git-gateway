@@ -1,4 +1,4 @@
-const webpackConfig = require('./webpack.config.js');
+const webpackConfig = require('./webpack.config');
 
 module.exports = {
 	...webpackConfig,
@@ -9,7 +9,9 @@ module.exports = {
 	mode: 'development',
 	devtool: 'inline-source-map',
 	devServer: {
-		contentBase: './example',
+		static: {
+			directory: './example',
+		},
 		hot: true,
 	},
 };

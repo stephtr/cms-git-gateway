@@ -15,7 +15,7 @@ import url from 'url';
 import createMemoryStore from 'memorystore';
 import { shouldSendSameSiteNone } from 'should-send-same-site-none';
 import rateLimit from 'express-rate-limit';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 import { User, User as AppUser } from './entities/user';
 import { Site } from './entities/site';
 
@@ -180,11 +180,11 @@ export async function setupExpressAuth(
 	});
 	passport.use('oidc', authStrategy);
 
-	passport.serializeUser<User, string>((user, done) => {
+	passport.serializeUser<string>((user, done) => {
 		return done(null, user.id);
 	});
 
-	passport.deserializeUser<User, string>((userId, done) => {
+	passport.deserializeUser<string>((userId, done) => {
 		getRepository(User)
 			.findOneOrFail(userId)
 			.then(
@@ -200,7 +200,7 @@ export async function setupExpressAuth(
 	);
 	app.get('/logout', (req, res) => {
 		req.logout();
-		req.session!.destroy(() => {});
+		req.session.destroy(() => {});
 		res.redirect(
 			authClient.endSessionUrl({ post_logout_redirect_uri: hostingUrl }),
 		);
@@ -209,6 +209,7 @@ export async function setupExpressAuth(
 	app.use(
 		'/oidc-callback',
 		apiLimiter,
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 		passport.authenticate('oidc', {
 			failureRedirect: '/error',
 		}),

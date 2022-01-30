@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-types */
 declare module 'memorystore' {
 	import expressSession, {
 		MemoryStore as ExpressMemoryStore,

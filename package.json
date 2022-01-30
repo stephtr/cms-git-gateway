@@ -14,8 +14,8 @@
 		"lint": "eslint . --max-warnings 0 --ext .js,.jsx,.ts,.tsx,.json",
 		"client": "cd client && yarn start",
 		"server": "cd server && yarn start",
-		"start": "concurrently --kill-others \"yarn run client\" \"yarn run server\"",
-		"build": "concurrently --kill-others \"cd client && yarn build\" \"cd server && yarn build\""
+		"start": "concurrently --kill-others-on-fail \"yarn run client\" \"yarn run server\"",
+		"build": "concurrently --kill-others-on-fail \"cd client && yarn build\" \"cd server && yarn build\""
 	},
 	"pre-commit": [
 		"lint"

@@ -41,6 +41,7 @@ const backgroundUpdateInterval = 60 * 1000;
 async function getConfig(configLocation?: string) {
 	const configResponse = await fetch(configLocation || 'config.yml');
 	const yamlString = await configResponse.text();
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 	return yaml.parse(yamlString);
 }
 

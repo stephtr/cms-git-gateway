@@ -72,6 +72,7 @@ export default function addAppRoutes(app: Express): void {
 		res.status(500).render('pages/error.ejs', { user: req.user }),
 	);
 
+	// eslint-disable-next-line @typescript-eslint/no-misused-promises
 	app.get('/', async (req, res) => {
 		if (req.user) {
 			req.user = await getRepository(User).findOne(req.user.id, {
@@ -89,7 +90,7 @@ export default function addAppRoutes(app: Express): void {
 		csrfProtection,
 		async (req, res) => {
 			const siteRepo = getRepository(Site);
-			const site = await siteRepo.findOne(req.body.id);
+			const site = await siteRepo.findOne(req.body.id as string);
 			if (site) {
 				if (req.body.action_remove !== undefined) {
 					await siteRepo.delete(site);
@@ -133,7 +134,7 @@ export default function addAppRoutes(app: Express): void {
 				}
 				if (req.body.action_revoke !== undefined) {
 					const user = await getRepository(User).findOne(
-						req.body.user,
+						req.body.user as string,
 					);
 					if (user) {
 						await createQueryBuilder()
@@ -205,9 +206,10 @@ export default function addAppRoutes(app: Express): void {
 				[ProxyTypes.GitLab]: 'https://gitlab.com/',
 				[ProxyTypes.Bitbucket]: 'https://bitbucket.org/',
 			};
-			const linkData = /^(https?:\/\/[^/]+\/)?([^:/]+\/[^:/]+)(\.git|\/)?$/.exec(
-				data.repository,
-			);
+			const linkData =
+				/^(https?:\/\/[^/]+\/)?([^:/]+\/[^:/]+)(\.git|\/)?$/.exec(
+					data.repository,
+				);
 			if (linkData) {
 				parsedData.repository =
 					(linkData[1] || defaultRepoHosts[parsedData.proxyType]) +
@@ -219,7 +221,7 @@ export default function addAppRoutes(app: Express): void {
 			if (!data.accessToken && req.body.id) {
 				parsedData.accessToken =
 					(
-						await siteRepo.findOne(req.body.id, {
+						await siteRepo.findOne(req.body.id as string, {
 							select: ['accessToken'],
 						})
 					)?.accessToken || '';
@@ -240,7 +242,7 @@ export default function addAppRoutes(app: Express): void {
 				});
 			}
 			if (req.body.mode === 'edit') {
-				await siteRepo.update(req.body.id, parsedData);
+				await siteRepo.update(req.body.id as string, parsedData);
 			} else {
 				await siteRepo.insert(parsedData);
 			}
@@ -267,7 +269,7 @@ export default function addAppRoutes(app: Express): void {
 		async (req, res) => {
 			const userRepo = getRepository(User);
 			if (req.body.userId !== req.user!.id) {
-				const user = await userRepo.findOne(req.body.userId);
+				const user = await userRepo.findOne(req.body.userId as string);
 				if (user) {
 					if (req.body.action_promote !== undefined) {
 						user.isAdmin = true;
@@ -296,6 +298,7 @@ export default function addAppRoutes(app: Express): void {
 
 	app.use(
 		'/github/*',
+		// eslint-disable-next-line @typescript-eslint/no-misused-promises
 		openCors,
 		async (req, res, next) => {
 			if (!req.user) {
@@ -304,7 +307,8 @@ export default function addAppRoutes(app: Express): void {
 					.json({ message: 'Not authorized' })
 					.end();
 			}
-			const requestFilter = /^\/github\/((git|contents|pulls|branches|merges|statuses|compare|commits)\/?|(issues\/(\d+)\/labels))/;
+			const requestFilter =
+				/^\/github\/((git|contents|pulls|branches|merges|statuses|compare|commits)\/?|(issues\/(\d+)\/labels))/;
 			if (!requestFilter.test(req.originalUrl)) {
 				return res.status(403).json({ message: 'forbidden' }).end();
 			}
@@ -344,13 +348,13 @@ export default function addAppRoutes(app: Express): void {
 				);
 			},
 			onProxyRes: (proxyRes, req) => {
-				proxyRes.headers['Access-Control-Allow-Origin'] = req.get(
-					'origin',
-				);
+				proxyRes.headers['Access-Control-Allow-Origin'] =
+					req.get('origin');
 			},
 		}),
 	);
 
+	// eslint-disable-next-line @typescript-eslint/no-misused-promises
 	app.use('/settings', openCors, (req, res) => {
 		if (!req.user) {
 			return res.status(401).json({ message: 'not authorized' }).end();
@@ -364,6 +368,7 @@ export default function addAppRoutes(app: Express): void {
 		}).end();
 	});
 
+	// eslint-disable-next-line @typescript-eslint/no-misused-promises
 	app.use('/user', openCors, (req, res) => {
 		if (!req.user) {
 			return res.status(401).json({ message: 'not authorized' }).end();

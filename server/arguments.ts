@@ -106,8 +106,10 @@ export function getArguments(): Arguments {
 		},
 	});
 
-	if (argv.hostingUrl === defaultLocalhostUrl) {
-		argv.hostingUrl += `:${argv.port}`;
+	const args = argv as Arguments;
+
+	if (args.hostingUrl === defaultLocalhostUrl) {
+		args.hostingUrl += `:${args.port}`;
 	}
-	return argv as Arguments;
+	return args;
 }
